@@ -1,0 +1,15 @@
+﻿<Properties StartupItem="EDMPlotter/EDMPlotter.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="NoHardware" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="DAQ/DAQmxTriggeredMultiAIHardware.cs">
+    <Files>
+      <File FileName="DAQ/DAQmxTriggeredMultiAIHardware.cs" Line="5" Column="7" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <DisabledProjects>
+    <String>DAQ/DAQ.csproj</String>
+  </DisabledProjects>
+</Properties>

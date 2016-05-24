@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDMPlotter", "EDMPlotter\EDMPlotter.csproj", "{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAQ", "DAQ\DAQ.csproj", "{A571419E-ADF9-47E7-97EF-14CAB721DE17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCode", "SharedCode\SharedCode.csproj", "{8BB61D3B-CC77-4A2F-9817-729DD3311560}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		NoHardware|Any CPU = NoHardware|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.NoHardware|Any CPU.ActiveCfg = NoHardware|Any CPU
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.NoHardware|Any CPU.Build.0 = NoHardware|Any CPU
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB61D3B-CC77-4A2F-9817-729DD3311560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A571419E-ADF9-47E7-97EF-14CAB721DE17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A571419E-ADF9-47E7-97EF-14CAB721DE17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A571419E-ADF9-47E7-97EF-14CAB721DE17}.NoHardware|Any CPU.ActiveCfg = NoHardware|Any CPU
+		{A571419E-ADF9-47E7-97EF-14CAB721DE17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A571419E-ADF9-47E7-97EF-14CAB721DE17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.NoHardware|Any CPU.ActiveCfg = NoHardware|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.NoHardware|Any CPU.Build.0 = NoHardware|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE99AFE-C0D9-4F5F-9991-D18910D6855D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
