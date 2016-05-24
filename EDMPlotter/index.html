@@ -36,15 +36,15 @@
             Auto-trigger:
             <br>
             <select name="AutoStart" id="AutoStart">
-                <option selected>false</option>
-                <option>true</option>
+                <option>false</option>
+                <option selected>true</option>
             </select>
             <br> Number of points:
             <br>
-            <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="1000">
-            <br> Sample rate:
+            <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+            <br> Sample loop rest interval (ms):
             <br>
-            <input type="text" name="SampleRate" id="SampleRate" value="200">
+            <input type="text" name="Sleep" id="Sleep" value="5">
             <br>
             <label>
                 <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan</label>
@@ -63,9 +63,11 @@
 
         //Stuff that doesn't change very often.
         var fixedParams = {
-                'AINames': ['x_val', 'dc', '1f', '2f'],
-                'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3', '/dev1/ai4'],
-                'TriggerAddress': '/dev1/PFI0'
+                'ScanParameter': 'frequency',
+                'AINames': ['dc', '1f', '2f'],
+                'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
+                'TriggerAddress': '/dev1/PFI0',
+                'DDSAddress': 'ASRL3::INSTR'
             }
             //Initially:
         var plotContainsData = false;
@@ -78,7 +80,6 @@
         // Declare a proxy to reference the hub.
         var pHub = $.connection.plotHub;
 
-
         // Create a function that the hub can call to plot the data.
         pHub.client.pushData = function(data) {
             //To see raw data:
@@ -86,6 +87,7 @@
 
             //parse to send to plotting functions.
             var jData = JSON.parse(data);
+
             pHub.client.clearData();
             appendData(document.getElementById("plot"), jData);
 
@@ -119,10 +121,12 @@
                     'AIAddresses': fixedParams.AIAddresses,
                     'AutoStart': document.querySelector('#AutoStart').value,
                     'TriggerAddress': fixedParams.TriggerAddress,
-                    'SampleRate': document.querySelector('#SampleRate').value,
+                    'Sleep': document.querySelector('#Sleep').value,
                     'eosStop': document.querySelector('#eosstopcheckbox').checked,
                     'eosSave': document.querySelector('#eosautosavecheckbox').checked,
-                    'savePath': document.querySelector('#savepathtextbox').value
+                    'savePath': document.querySelector('#savepathtextbox').value,
+                    'DDSAddress': fixedParams.DDSAddress,
+                    'ScanParameter' : fixedParams.ScanParameter
                 };
 
                 // Call the Start method on the hub.
@@ -137,8 +141,8 @@
             });
 
             $('#clearbutton').click(function() {
-                // Call the StopPlotting method on the hub.
-                pHub.server.clearAll();
+                //Clears data locally in browser
+                pHub.client.clearData();
 
             });
 

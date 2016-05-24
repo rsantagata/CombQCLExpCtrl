@@ -5,8 +5,8 @@ var nameIndexLookup;
 
 
 function initialisePlot(domElement, expParams) {
-    x_axis_name = expParams.AINames[0]; //Convention: first channel is always the x_axis.
-    channelNames = expParams.AINames.slice(1, expParams.AINames.length + 1); //The others are the channels to plot.
+    x_axis_name = expParams.ScanParameter;
+    channelNames = expParams.AINames; //The others are the channels to plot.
 
     nameIndexLookup = createLookupTable(channelNames);
     var initData = channelNames.map(function(d) {
@@ -14,7 +14,7 @@ function initialisePlot(domElement, expParams) {
     })
 
     //Create empty plot
-    Plotly.newPlot(domElement, initData, { margin: { t: 50, b: 50, l: 50, r: 50 } }, { modeBarButtonsToRemove: ['sendDataToCloud'], showLink: false, displaylogo: false });
+    Plotly.newPlot(domElement, initData, { margin: { t: 50, b: 50, l: 50, r: 50 } }, { modeBarButtonsToRemove: ['sendDataToCloud', 'toImage'], showLink: false, displaylogo: false });
 
     this.expParams = expParams;
 };

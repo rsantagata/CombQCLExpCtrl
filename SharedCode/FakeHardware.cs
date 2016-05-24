@@ -2,7 +2,7 @@
 
 namespace SharedCode
 {
-	public class FakeHardware : IExperimentHardware
+	public class FakeHardware : IExperiment
 	{
 		DataSet data;
 		ExperimentParameters parameters;

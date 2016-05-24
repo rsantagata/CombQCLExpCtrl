@@ -13,10 +13,10 @@ using SharedCode;
 
 namespace EDMPlotter
 {
-    public class Experiment
+    public class ExperimentControl //: IDataDroppable
     {
         #region Declarations, constructors, accessors
-        private readonly static Lazy<Experiment> _instance = new Lazy<Experiment>(() => new Experiment(GlobalHost.ConnectionManager.GetHubContext<PlotHub>().Clients));
+        private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<PlotHub>().Clients));
 
 
         DataSet dataSet;
@@ -28,20 +28,19 @@ namespace EDMPlotter
 
         Thread experimentThread;
 
-        IExperimentHardware hardware;
+        IExperiment exp;
 
-        public Experiment(IHubConnectionContext<dynamic> clients)
+        public ExperimentControl(IHubConnectionContext<dynamic> clients)
         {
             Clients = clients;
-
-            hardware = new DAQmxTriggeredMultiAIHardware();
+            exp = new CombQCLScanHardware();
             //hardware = new FakeHardware();
 
             es = ExperimentState.IsStopped;
             Clients.All.toConsole("Experiment is ready.");
         }
 
-        public static Experiment Instance
+        public static ExperimentControl Instance
         {
             get
             {
@@ -55,7 +54,6 @@ namespace EDMPlotter
             set;
         }
         #endregion
-
 
         #region public
         public void StartExperiment(string jsonParams)
@@ -90,19 +88,6 @@ namespace EDMPlotter
             }
         }
 
-        public void Clear()
-        {
-            Clients.All.toConsole("Clearing...");
-            if (es.Equals(ExperimentState.IsStopped))
-            {
-                Clients.All.clearData();
-                Clients.All.toConsole("Cleared.");
-            }
-            else
-            {
-                Clients.All.toConsole("Cannot clear data. Experiment is still running.");
-            }
-        }
         public void Save(string path)
         {
             Clients.All.toConsole("Saving to: " + path);
@@ -118,19 +103,20 @@ namespace EDMPlotter
 
         }
 
+
         #endregion
 
         #region RUN
         void run()
         {
             Clients.All.toConsole("Initialising hardware.");
-            hardware.Initialise(parameters);
+            exp.Initialise(parameters);
 
             Clients.All.toConsole("Acquiring data...");
             int numberOfScans = 0;
             while (es.Equals(ExperimentState.IsRunning))
             {
-                dataSet = hardware.Run();
+                dataSet = exp.Run();
                 //Push data down to the client like this.
                 Clients.All.pushData(dataSet.ToJson());
                 if (parameters.EOSSave)
@@ -153,7 +139,7 @@ namespace EDMPlotter
             }
             Clients.All.toConsole("Acquisition complete.");
             Clients.All.toConsole("Disposing hardware classes...");
-            hardware.Dispose();
+            exp.Dispose();
             Clients.All.toConsole("Disposed.");
             Clients.All.toConsole("Setting ExperimentState to stopped and closing thread...");
             es = ExperimentState.IsStopped;
@@ -194,12 +180,15 @@ namespace EDMPlotter
             'SampleRate': '200',
             'EOSStop' : true,
             'EOSSave' : false,
-            'SavePath' : ''
-            }";
+            'SavePath' : '',
+            'DDSAddress' : 'ASRL3::INSTR'
+            }
+            ";
                 parameters = JsonConvert.DeserializeObject<ExperimentParameters>(jsonParams);
             }
 
         }
+
 
     }
     #endregion

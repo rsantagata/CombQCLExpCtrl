@@ -2,7 +2,7 @@
 
 namespace SharedCode
 {
-	public interface IExperimentHardware
+	public interface IExperiment
 	{
 		void Initialise(ExperimentParameters p);
 		DataSet Run();

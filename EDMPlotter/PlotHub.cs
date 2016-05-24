@@ -9,33 +9,28 @@ namespace EDMPlotter
 {
     public class PlotHub : Hub
     {
-        private readonly Experiment _experiment;
+        private readonly ExperimentControl _experiment;
 
-        public PlotHub() : this(Experiment.Instance) { }
+        public PlotHub() : this(ExperimentControl.Instance) { }
 
-        public PlotHub(Experiment e)
+        public PlotHub(ExperimentControl e)
         {
             _experiment = e;
         }
 
         public void Start(string parameters)
         {
-            Experiment.Instance.StartExperiment(parameters);
+            ExperimentControl.Instance.StartExperiment(parameters);
         }
 
         public void Stop()
         {
-            Experiment.Instance.StopExperiment();
-        }
-
-        public void ClearAll()
-        {
-            Experiment.Instance.Clear();
+            ExperimentControl.Instance.StopExperiment();
         }
 
         public void Save(string path)
         {
-            Experiment.Instance.Save(path);
+            ExperimentControl.Instance.Save(path);
         }
 
     }

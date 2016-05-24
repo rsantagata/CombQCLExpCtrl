@@ -11,6 +11,12 @@ namespace SharedCode
     {
         public List<KeyValuePair<string, double>> kvPairs;
 
+        public DataPoint(string name, double val)
+        {
+            kvPairs = new List<KeyValuePair<string, double>>();
+            kvPairs.Add(new KeyValuePair<string, double>(name, val));
+        }
+
         public DataPoint(string[] names, double[] vals)
         {
             kvPairs = new List<KeyValuePair<string, double>>();
@@ -32,6 +38,14 @@ namespace SharedCode
                 o[kvPairs[i].Key] = kvPairs[i].Value;
             }
             return o;
+        }
+
+        public void Add(string[] names, double[] vals)
+        {
+            for (int i = 0; i < names.Length; i++)
+            {
+                kvPairs.Add(new KeyValuePair<string, double>(names[i], vals[i]));
+            }
         }
         
     }

@@ -44,7 +44,7 @@
     <Compile Include="DataSet.cs" />
     <Compile Include="DataPoint.cs" />
     <Compile Include="CsvExport.cs" />
-    <Compile Include="IExperimentHardware.cs" />
+    <Compile Include="IExperiment.cs" />
     <Compile Include="ExperimentParameters.cs" />
     <Compile Include="FakeHardware.cs" />
     <Compile Include="TsvExport.cs" />
