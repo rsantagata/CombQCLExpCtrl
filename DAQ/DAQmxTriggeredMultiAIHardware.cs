@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using NationalInstruments;
-using NationalInstruments.DAQmx;
+﻿using NationalInstruments.DAQmx;
 using SharedCode;
 
 namespace DAQ

@@ -47,6 +47,7 @@
     <Compile Include="IExperimentHardware.cs" />
     <Compile Include="ExperimentParameters.cs" />
     <Compile Include="FakeHardware.cs" />
+    <Compile Include="TsvExport.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
