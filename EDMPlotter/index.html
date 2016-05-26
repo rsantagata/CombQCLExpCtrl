@@ -23,12 +23,6 @@
     <div class="controlpanel">
         <input type="button" id="startbutton" value="Start" />
         <input type="button" id="stopbutton" value="Stop" />
-        <input type="button" id="clearbutton" value="Clear" />
-        <input type="button" id="savedatabutton" value="Save to" />
-        <input type="text" id="savepathtextbox" value="C:\data\data.csv" />
-        <label>
-            <input type="checkbox" name="eosautosavecheckbox" id="eosautosavecheckbox" value="eosStop" />Autosave on end-of-Scan
-        </label>
     </div>
     <div class="controlpanel">
         <form name="ExpParams" id="ExpParams">
@@ -55,17 +49,21 @@
     </div>
     <div class="container">
         <div id="plot" style="left:10%;height:auto;width:80%;"></div>
+        <input type="button" id="clearbutton" value="Clear" />
     </div>
     <div class="container">
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
+        <input type="button" id="savedatabutton" value="Save to" />
+        <input type="text" id="savepathtextbox" value="C:\data\data.json" />
+        <label>
+            <input type="checkbox" name="eosautosavecheckbox" id="eosautosavecheckbox" value="eosStop" />Autosave on end-of-Scan
+        </label>
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
 
     <script type="text/javascript">
-        //The main script.
+
         $(function () {
-            //Initially:
-            var plotContainsData = false;
 
             $('#localconsole').val("Hi! Connecting to experiment now. Please wait.");
 
@@ -80,38 +78,23 @@
 
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
-
                 //Keep data and experimental parameters on screen:
                 $('#rawData').val(function () {
                     var exp = { 'params': getExperimentParameters() , 'data' : jData};
                     return JSON.stringify(exp, null, '\t');
                 });
-
-
-
-                pHub.client.clearData();
+                clearData();
                 appendData(document.getElementById("plot"), jData);
 
-                //a little cheezy, but keeps track of if data is appearing on screen.
-                plotContainsData = true;
-
             };
 
-            //This gets called by several things: the browser UI clear button (via c#, in case we ever want the c# to know about it) and the pushData function when new data arrives (otherwise old data doesn't get cleared)
-            pHub.client.clearData = function () {
-                if (plotContainsData) {
-                    deleteData(document.getElementById("plot"));
-                    plotContainsData = false;
-                }
-            };
-
-            //The console
+            //The console, which the hub can call to print information
             pHub.client.toConsole = function (s) {
                 $('#localconsole').val($('#localconsole').val() + '\n' + s);
                 $('#localconsole').scrollTop($('#localconsole')[0].scrollHeight);
             };
 
-            // Start the connection! Herein are start, stop, clear and save functions, which interact with the experiment.
+            // Start the connection! Herein are start and stop functions, which interact with the experiment.
             $.connection.hub.start().done(function () {
 
                 $('#startbutton').click(function () {
@@ -128,17 +111,24 @@
 
                 $('#clearbutton').click(function () {
                     //Clears data locally in browser
-                    pHub.client.clearData();
-
+                    clearData();
                 });
 
                 $('#savedatabutton').click(function () {
                     pHub.server.save($('#savepathtextbox').val());
                 });
-
             });
 
+
+
         });
+
+        //Clears data in plot
+        var clearData = function () {
+            deleteData(document.getElementById("plot"));
+        };
+
+        //Manipulating the data once it's taken.
         var copyButton = document.querySelector('#copydatabutton');
         copyButton.addEventListener('click', function (event) {
             var d = document.querySelector('#rawData');
@@ -151,8 +141,9 @@
             window.getSelection().removeRange(range);
         });
 
-        var getExperimentParameters = function () {
 
+        //Gets parameters on UI
+        var getExperimentParameters = function () {
             //Stuff that doesn't change very often can be hardcoded here.
             var params = {
                 'NumberOfPoints': document.querySelector('#NumberOfPoints').value,

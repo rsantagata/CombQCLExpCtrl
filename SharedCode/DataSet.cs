@@ -31,28 +31,18 @@ namespace SharedCode
 
         public string ToJson()
         {
+            return ToJson(Formatting.None);
+        }
+        public string ToJson(Formatting f)
+        {
             JObject o = new JObject();
-            JArray array = new JArray(); 
-            for(int i = 0; i < Length; i++)
+            JArray array = new JArray();
+            for (int i = 0; i < Length; i++)
             {
                 array.Add(Points[i].ToJson());
             }
-            return array.ToString(Formatting.None);
+            return array.ToString(f);
         }
-        
-        public void Save(string path)
-        {
-            //CsvExport csv = new CsvExport();
-            TsvExport csv = new TsvExport();
-            for (int i = 0; i < Length; i++)
-            {
-                csv.AddRow();
-                foreach(KeyValuePair<string, double> p in Points[i].kvPairs)
-                {
-                    csv[p.Key] = p.Value;
-                }
-            }
-            csv.ExportToFile(@"" + path);
-        }
+
     }
 }

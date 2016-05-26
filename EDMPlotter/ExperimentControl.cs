@@ -152,7 +152,8 @@ namespace EDMPlotter
         {
             try
             {
-                dataSet.Save(path);
+                File.WriteAllText(path, "{ \"params\" : " + JsonConvert.SerializeObject(parameters, Formatting.Indented) + ", \"data\": " + dataSet.ToJson(Formatting.Indented) + "}");
+                //dataSet.Save(path);
             }
             catch (IOException e)
             {
@@ -188,8 +189,22 @@ namespace EDMPlotter
             }
 
         }
-
-
+        /*
+        public void Save(string path)
+        {
+            //CsvExport csv = new CsvExport();
+            //TsvExport csv = new TsvExport();
+            JSONExport csv = new JSONExport();
+             for (int i = 0; i < Length; i++)
+             {
+                 csv.AddRow();
+                 foreach(KeyValuePair<string, double> p in Points[i].kvPairs)
+                 {
+                     csv[p.Key] = p.Value;
+                 }
+             }
+            csv.ExportToFile(@"" + path, );
+        }*/
     }
     #endregion
 }
