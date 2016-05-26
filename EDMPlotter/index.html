@@ -23,7 +23,6 @@
     <div class="controlpanel">
         <input type="button" id="startbutton" value="Start" />
         <input type="button" id="stopbutton" value="Stop" />
-        <input type="button" id="copydatabutton" value="Copy to clipboard" />
         <input type="button" id="clearbutton" value="Clear" />
         <input type="button" id="savedatabutton" value="Save to" />
         <input type="text" id="savepathtextbox" value="C:\data\data.csv" />
@@ -47,7 +46,8 @@
             <input type="text" name="Sleep" id="Sleep" value="5">
             <br>
             <label>
-                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan</label>
+                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
+            </label>
         </form>
     </div>
     <div class="consolebox">
@@ -57,112 +57,90 @@
         <div id="plot" style="left:10%;height:auto;width:80%;"></div>
     </div>
     <div class="container">
+        <input type="button" id="copydatabutton" value="Copy to clipboard" />
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
 
     <script type="text/javascript">
-    //The main script.
-    $(function() {
-
-        //Stuff that doesn't change very often.
-        var fixedParams = {
-                'ScanParameter': 'frequency',
-                'AINames': ['dc', '1f', '2f'],
-                'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
-                'TriggerAddress': '/dev1/PFI0',
-                'DDSAddress': 'ASRL3::INSTR'
-            }
+        //The main script.
+        $(function () {
             //Initially:
-        var plotContainsData = false;
+            var plotContainsData = false;
 
-        $('#localconsole').val("Hi! Connecting to experiment now. Please wait.");
+            $('#localconsole').val("Hi! Connecting to experiment now. Please wait.");
 
-        //Getting plot ready.
-        initialisePlot(document.getElementById("plot"), fixedParams);
+            //Getting plot ready.
+            initialisePlot(document.getElementById("plot"), getExperimentParameters());
 
-        // Declare a proxy to reference the hub.
-        var pHub = $.connection.plotHub;
+            // Declare a proxy to reference the hub.
+            var pHub = $.connection.plotHub;
 
-        // Create a function that the hub can call to plot the data.
-        pHub.client.pushData = function(data) {
-            //To see raw data:
-            //pHub.client.toConsole(data);
+            // Create a function that the hub can call to plot the data.
+            pHub.client.pushData = function (data) {
 
-            //Keep data on div:
-            $('#rawData').val(data)
+                //parse to send to plotting functions.
+                var jData = JSON.parse(data);
 
-            //parse to send to plotting functions.
-            var jData = JSON.parse(data);
+                //Keep data and experimental parameters on screen:
+                $('#rawData').val(function () {
+                    var exp = { 'params': getExperimentParameters() , 'data' : jData};
+                    return JSON.stringify(exp, null, '\t');
+                });
 
-            pHub.client.clearData();
-            appendData(document.getElementById("plot"), jData);
 
-            //a little cheezy, but keeps track of if data is appearing on screen.
-            plotContainsData = true;
 
-        };
-
-        //This gets called by several things: the browser UI clear button (via c#, in case we ever want the c# to know about it) and the pushData function when new data arrives (otherwise old data doesn't get cleared)
-        pHub.client.clearData = function() {
-            if (plotContainsData) {
-                deleteData(document.getElementById("plot"));
-                plotContainsData = false;
-            }
-        };
-
-        //The console
-        pHub.client.toConsole = function(s) {
-            $('#localconsole').val($('#localconsole').val() + '\n' + s);
-            $('#localconsole').scrollTop($('#localconsole')[0].scrollHeight);
-        };
-
-        // Start the connection! Herein are start, stop, clear and save functions, which interact with the experiment.
-        $.connection.hub.start().done(function() {
-
-            $('#startbutton').click(function() {
-
-                var params = {
-                    'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
-                    'AINames': fixedParams.AINames,
-                    'AIAddresses': fixedParams.AIAddresses,
-                    'AutoStart': document.querySelector('#AutoStart').value,
-                    'TriggerAddress': fixedParams.TriggerAddress,
-                    'Sleep': document.querySelector('#Sleep').value,
-                    'eosStop': document.querySelector('#eosstopcheckbox').checked,
-                    'eosSave': document.querySelector('#eosautosavecheckbox').checked,
-                    'savePath': document.querySelector('#savepathtextbox').value,
-                    'DDSAddress': fixedParams.DDSAddress,
-                    'ScanParameter' : fixedParams.ScanParameter
-                };
-
-                // Call the Start method on the hub.
-                pHub.server.start(JSON.stringify(params));
-
-            });
-
-            $('#stopbutton').click(function() {
-                // Call the Stop method on the hub.
-                pHub.server.stop();
-
-            });
-
-            $('#clearbutton').click(function() {
-                //Clears data locally in browser
                 pHub.client.clearData();
+                appendData(document.getElementById("plot"), jData);
 
-            });
+                //a little cheezy, but keeps track of if data is appearing on screen.
+                plotContainsData = true;
 
-            $('#savedatabutton').click(function() {
-                pHub.server.save($('#savepathtextbox').val());
+            };
+
+            //This gets called by several things: the browser UI clear button (via c#, in case we ever want the c# to know about it) and the pushData function when new data arrives (otherwise old data doesn't get cleared)
+            pHub.client.clearData = function () {
+                if (plotContainsData) {
+                    deleteData(document.getElementById("plot"));
+                    plotContainsData = false;
+                }
+            };
+
+            //The console
+            pHub.client.toConsole = function (s) {
+                $('#localconsole').val($('#localconsole').val() + '\n' + s);
+                $('#localconsole').scrollTop($('#localconsole')[0].scrollHeight);
+            };
+
+            // Start the connection! Herein are start, stop, clear and save functions, which interact with the experiment.
+            $.connection.hub.start().done(function () {
+
+                $('#startbutton').click(function () {
+                    // Call the Start method on the hub.
+                    pHub.server.start(JSON.stringify(getExperimentParameters()));
+
+                });
+
+                $('#stopbutton').click(function () {
+                    // Call the Stop method on the hub.
+                    pHub.server.stop();
+
+                });
+
+                $('#clearbutton').click(function () {
+                    //Clears data locally in browser
+                    pHub.client.clearData();
+
+                });
+
+                $('#savedatabutton').click(function () {
+                    pHub.server.save($('#savepathtextbox').val());
+                });
+
             });
 
         });
-
-    });
-    </script>
-    <script>
         var copyButton = document.querySelector('#copydatabutton');
-        copyButton.addEventListener('click', function(event) {
+        copyButton.addEventListener('click', function (event) {
             var d = document.querySelector('#rawData');
             var range = document.createRange();
             range.selectNode(d);
@@ -172,6 +150,24 @@
 
             window.getSelection().removeRange(range);
         });
+
+        var getExperimentParameters = function () {
+
+            //Stuff that doesn't change very often can be hardcoded here.
+            var params = {
+                'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
+                'AINames': ['dc', '1f', '2f'],
+                'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
+                'AutoStart': document.querySelector('#AutoStart').value,
+                'TriggerAddress': '/dev1/PFI0',
+                'Sleep': document.querySelector('#Sleep').value,
+                'eosStop': document.querySelector('#eosstopcheckbox').checked,
+                'eosSave': document.querySelector('#eosautosavecheckbox').checked,
+                'savePath': document.querySelector('#savepathtextbox').value,
+                'DDSAddress': 'ASRL3::INSTR',
+                'ScanParameter': 'frequency'
+            };
+            return params;
+        }
     </script>
 </body>
-
