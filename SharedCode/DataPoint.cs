@@ -47,6 +47,20 @@ namespace SharedCode
                 kvPairs.Add(new KeyValuePair<string, double>(names[i], vals[i]));
             }
         }
+
+        public double GetValueOfKey(string key)
+        {
+            foreach(KeyValuePair<string, double> p in kvPairs)
+            {
+                if(p.Key.Equals(key))
+                {
+                    return p.Value;
+                }
+            }
+            ArgumentException a = new ArgumentException("No value found for this key.");
+            throw a;
+           
+        }
         
     }
 

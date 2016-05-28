@@ -18,19 +18,24 @@ namespace EDMPlotter
             _experiment = e;
         }
 
-        public void Start(string parameters)
+        public void StartExperiment(string parameters)
         {
             ExperimentControl.Instance.StartExperiment(parameters);
         }
 
-        public void Stop()
+        public void StopExperiment()
         {
             ExperimentControl.Instance.StopExperiment();
         }
 
-        public void Save(string path)
+        public void SaveExperiment(string path)
         {
             ExperimentControl.Instance.Save(path);
+        }
+
+        public void OpenMathematicaNotebook()
+        {
+            ExperimentControl.Instance.GenerateMMANotebook();
         }
 
     }

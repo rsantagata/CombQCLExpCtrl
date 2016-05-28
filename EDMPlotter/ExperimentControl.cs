@@ -9,6 +9,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 using Newtonsoft.Json;
 using DAQ;
 using SharedCode;
+using Wolfram.NETLink;
 
 
 namespace EDMPlotter
@@ -18,6 +19,7 @@ namespace EDMPlotter
         #region Declarations, constructors, accessors
         private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<PlotHub>().Clients));
 
+        PlotHub hub;
 
         DataSet dataSet;
         ExperimentParameters parameters;
@@ -103,6 +105,13 @@ namespace EDMPlotter
 
         }
 
+        public void GenerateMMANotebook()
+        {
+            string mmaFormat = MMANotebookHelper.PrepareDataForMMA(dataSet, parameters);
+            Clients.All.toConsole(mmaFormat);
+            string location = MMANotebookHelper.CreateNotebook(mmaFormat, @"C:/data/mmatest.nb", new MathKernel(), true);
+            Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
+        }
 
         #endregion
 
@@ -153,6 +162,8 @@ namespace EDMPlotter
             try
             {
                 File.WriteAllText(path, "{ \"params\" : " + JsonConvert.SerializeObject(parameters, Formatting.Indented) + ", \"data\": " + dataSet.ToJson(Formatting.Indented) + "}");
+
+                //Use this if saving (only!) the data to a CSV/TSV file. Turned off for the moment.
                 //dataSet.Save(path);
             }
             catch (IOException e)

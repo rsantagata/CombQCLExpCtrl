@@ -29,6 +29,16 @@ namespace SharedCode
             Points.Add(p);
         }
 
+        public double[] GetAllValuesOfKey(string key)
+        {
+            double[] values = new double[Points.Count];
+            for(int i = 0; i < Points.Count; i++)
+            {
+                values[i] = Points[i].GetValueOfKey(key);
+            }
+            return values;
+        }
+
         public string ToJson()
         {
             return ToJson(Formatting.None);

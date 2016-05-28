@@ -52,6 +52,7 @@
     </div>
     <div class="container">
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
+        <input type="button" id="openinmma" value="Open in Mathematica" />
         <input type="button" id="savedatabutton" value="Save to" />
         <input type="text" id="savepathtextbox" value="C:\data\data.json" />
         <label>
@@ -98,13 +99,13 @@
 
                 $('#startbutton').click(function () {
                     // Call the Start method on the hub.
-                    pHub.server.start(JSON.stringify(getExperimentParameters()));
+                    pHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
 
                 });
 
                 $('#stopbutton').click(function () {
                     // Call the Stop method on the hub.
-                    pHub.server.stop();
+                    pHub.server.stopExperiment();
 
                 });
 
@@ -114,7 +115,11 @@
                 });
 
                 $('#savedatabutton').click(function () {
-                    pHub.server.save($('#savepathtextbox').val());
+                    pHub.server.saveExperiment($('#savepathtextbox').val());
+                });
+
+                $('#openinmma').click(function () {
+                    pHub.server.openMathematicaNotebook();
                 });
             });
 

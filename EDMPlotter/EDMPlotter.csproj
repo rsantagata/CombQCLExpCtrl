@@ -70,6 +70,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Wolfram.NETLink">
+      <HintPath>..\..\..\..\..\..\Program Files\Wolfram Research\Mathematica\10.3\SystemFiles\Links\NETLink\Wolfram.NETLink.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -106,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExperimentControl.cs" />
+    <Compile Include="MMANotebookHelper.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="PlotHub.cs" />
   </ItemGroup>
