@@ -12,87 +12,16 @@ namespace EDMPlotter
 
     public static class MMANotebookHelper
     {
-        public static string PrepareDataForMMAOld(DataSet d, ExperimentParameters parameters)
-        {
-            string result = "";
-            foreach(PropertyInfo p in parameters.GetType().GetRuntimeProperties())
-            {
-                object o = p.GetValue(parameters, null);
-                if (o.GetType().IsArray)
-                {
-                    result += ToMMASymbol(p.Name) + " = {";
-                    foreach (object obj in (object[])o)
-                    {
-                        result += ToMMAValue(obj);
-                    }
-                    result = result.Remove(result.Length - 1) + "};\n"; //Cheezy way of removing the last comma
-                }
-                else
-                {
-                    object obj = p.GetValue(parameters, null);
-                    if (obj.GetType().Equals(typeof(string)))
-                    {
-                        result += ToMMASymbol(p.Name) + " = " + "\"" + obj.ToString() + "\"" + ";\n";
-                    }
-                   else
-                    {
-                        result += ToMMASymbol(p.Name) + " = " + obj.ToString() + ";\n";
-                    }
-                }
-                
-            }
-            
-            double[] scanParameterValues = d.GetAllValuesOfKey(parameters.ScanParameter);
-            result += ToMMASymbol(parameters.ScanParameter) + " = {";
-            foreach(double val in scanParameterValues)
-            {
-                result += val.ToString() + ",";
-            }
-            result = result.Remove(result.Length - 1); //Cheezy way of removing the last comma
-            result += "};\n";
-
-            foreach (string AIName in parameters.AINames)
-            {
-                double[] values = d.GetAllValuesOfKey(AIName);
-                result += ToMMASymbol(AIName) + " = {";
-                foreach (double val in values)
-                {
-                    result += val.ToString() + ",";
-                }
-                result = result.Remove(result.Length - 1); //Cheezy way of removing the last comma
-                result += "};\n";
-            }
-            
-            return result;
-        }
         
-        private static string ToMMAValue(object o)
-        {
-            Type t = o.GetType();
-            if(t.Equals(typeof(string)))
-            {
-                return "\"" + o.ToString() + "\"";
-            }
-            else
-            {
-                return o.ToString();
-            }
-        }
-        private static string ToMMASymbol(string s)
-        {
-            var charsToRemove = new string[] { "@", ",", ".", ";", "'" };
-            foreach (var c in charsToRemove)
-            {
-                s = s.Replace(c, string.Empty);
-            };
-            return s;
-        }
-
-        public static string PrepareDataForMMA(DataSet d, ExperimentParameters parameters)
+        public static string PrepareDataForMMA(List<DataSet> d, ExperimentParameters parameters)
         {
             string result = "";
             result += convertParams(parameters);
-            result += convertData(d, parameters);
+            for(int i = 0; i < d.Count; i++)
+            {
+                result += convertData(d[i], parameters, i);
+            }
+            result += "params[\"numberOfScans\"] = " + d.Count + ";\n";
             return result;
         }
 
@@ -118,11 +47,11 @@ namespace EDMPlotter
             }
             return parameters;
         }
-        static string convertData(DataSet d, ExperimentParameters parameters)
+        static string convertData(DataSet d, ExperimentParameters parameters, int index)
         {
             string result = "";
             double[] scanParameterValues = d.GetAllValuesOfKey(parameters.ScanParameter);
-            result += "data[\"" + parameters.ScanParameter + "\"] = {";
+            result += "data[" + index.ToString() + ", \"" + parameters.ScanParameter + "\"] = {";
             foreach (double val in scanParameterValues)
             {
                 result += val.ToString() + ",";
@@ -133,7 +62,7 @@ namespace EDMPlotter
             foreach (string AIName in parameters.AINames)
             {
                 double[] values = d.GetAllValuesOfKey(AIName);
-                result += "data[\"" + AIName + "\"] = {";
+                result += "data[" + index.ToString() + ", \"" + AIName + "\"] = {";
                 foreach (double val in values)
                 {
                     result += val.ToString() + ",";

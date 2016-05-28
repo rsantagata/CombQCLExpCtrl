@@ -14,9 +14,6 @@ namespace SharedCode
         public bool AutoStart { get; set; }
         public string TriggerAddress { get; set; }
         public int Sleep { get; set; }
-        public bool EOSStop { get; set; }
-        public bool EOSSave { get; set; }
-        public string SavePath { get; set; }
         public string DDSAddress { get; set; }
         public string ScanParameter { get; set; }
     }

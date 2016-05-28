@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using DAQ;
 using SharedCode;
 using Wolfram.NETLink;
-
+using System.Diagnostics;
 
 namespace EDMPlotter
 {
@@ -19,9 +19,8 @@ namespace EDMPlotter
         #region Declarations, constructors, accessors
         private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<PlotHub>().Clients));
 
-        PlotHub hub;
-
-        DataSet dataSet;
+        List<DataSet> dataArchive;
+        DataSet currentDataSet;
         ExperimentParameters parameters;
         enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
         ExperimentState es;
@@ -67,6 +66,8 @@ namespace EDMPlotter
                 Clients.All.toConsole("Starting...");
                 initialiseExperimentalParameters(jsonParams);
 
+                dataArchive = new List<DataSet>();
+
                 experimentThread = new Thread(new ThreadStart(run));
                 experimentThread.Start();
 
@@ -90,12 +91,24 @@ namespace EDMPlotter
             }
         }
 
-        public void Save(string path)
+        public void Save(string format)
         {
-            Clients.All.toConsole("Saving to: " + path);
+            Clients.All.toConsole("Preparing Export.");
             if (es.Equals(ExperimentState.IsStopped))
             {
-                saveData(path);
+                string outputData = "";
+                if(format.Equals("JSON"))
+                {
+                    string path = @"C:\Users\Equipe\Documents\GitHub\CombQCLExpCtrl\EDMPlotter\tmp\tempjson.json";
+                    outputData = saveDataToJSON(path);
+                }
+                if(format.Equals("Mathematica"))
+                {
+                    string path = @"C:\Users\Equipe\Documents\GitHub\CombQCLExpCtrl\EDMPlotter\tmp\tempmma.nb";
+                    outputData = saveDataToMMANotebook(path);
+                    
+                }
+                Clients.All.pushAllDataToTextArea(outputData);
                 Clients.All.toConsole("Data Saved.");
             }
             else
@@ -103,14 +116,6 @@ namespace EDMPlotter
                 Clients.All.toConsole("Cannot save data. Experiment is still running.");
             }
 
-        }
-
-        public void GenerateMMANotebook()
-        {
-            string mmaFormat = MMANotebookHelper.PrepareDataForMMA(dataSet, parameters);
-            Clients.All.toConsole(mmaFormat);
-            string location = MMANotebookHelper.CreateNotebook(mmaFormat, @"C:/data/mmatest.nb", new MathKernel(), true);
-            Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
         }
 
         #endregion
@@ -125,26 +130,11 @@ namespace EDMPlotter
             int numberOfScans = 0;
             while (es.Equals(ExperimentState.IsRunning))
             {
-                dataSet = exp.Run();
+                currentDataSet = exp.Run();
                 //Push data down to the client like this.
-                Clients.All.pushData(dataSet.ToJson());
-                if (parameters.EOSSave)
-                {
-                    string path = Path.GetDirectoryName(parameters.SavePath);
-                    string extension = Path.GetExtension(parameters.SavePath);
-                    string fileName = Path.GetFileNameWithoutExtension(parameters.SavePath);
-
-                    saveData(path + "\\" + fileName + "_" + numberOfScans.ToString() + extension);
-                }
-                if (parameters.EOSStop)
-                {
-                    es = ExperimentState.IsFinishing;
-                }
-                else
-                {
-                    numberOfScans++;
-                }
-
+                Clients.All.pushLatestData(currentDataSet.ToJson());
+                dataArchive.Add(currentDataSet);
+                numberOfScans++;
             }
             Clients.All.toConsole("Acquisition complete.");
             Clients.All.toConsole("Disposing hardware classes...");
@@ -157,12 +147,26 @@ namespace EDMPlotter
 
         #region private 
 
-        void saveData(string path)
+        string getJSONString()
         {
+            string jsontext = "{ \"params\" : " + JsonConvert.SerializeObject(parameters, Formatting.Indented);
+            for (int i = 0; i < dataArchive.Count; i++)
+            {
+                jsontext += ", \"data_" + i.ToString() + "\": " + dataArchive[i].ToJson(Formatting.Indented);
+            }
+            jsontext += "}";
+            return jsontext;
+        }
+
+        string saveDataToJSON(string path)
+        {
+            string jsontext = "";
             try
             {
-                File.WriteAllText(path, "{ \"params\" : " + JsonConvert.SerializeObject(parameters, Formatting.Indented) + ", \"data\": " + dataSet.ToJson(Formatting.Indented) + "}");
-
+                jsontext = getJSONString();   
+                File.WriteAllText(path, jsontext);
+                Clients.All.toConsole("Preparing new Mathematica notebook at: " + path);
+                Clients.All.displayDownloadLink(path);
                 //Use this if saving (only!) the data to a CSV/TSV file. Turned off for the moment.
                 //dataSet.Save(path);
             }
@@ -170,6 +174,25 @@ namespace EDMPlotter
             {
                 Console.WriteLine(e.Message);
             }
+            return jsontext;
+        }
+
+        string saveDataToMMANotebook(string path)
+        {
+            string mmaFormat = "";
+            try
+            {
+                mmaFormat = MMANotebookHelper.PrepareDataForMMA(dataArchive, parameters);
+                //Clients.All.toConsole(mmaFormat);
+                string location = MMANotebookHelper.CreateNotebook(mmaFormat, path, new MathKernel(), true);
+                Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
+                Clients.All.displayDownloadLink(location);
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return mmaFormat;
         }
 
         void initialiseExperimentalParameters(string jsonParams)
@@ -190,9 +213,6 @@ namespace EDMPlotter
             'AutoStart': 'false',
             'TriggerAddress': '/dev1/PFI0',
             'SampleRate': '200',
-            'EOSStop' : true,
-            'EOSSave' : false,
-            'SavePath' : '',
             'DDSAddress' : 'ASRL3::INSTR'
             }
             ";

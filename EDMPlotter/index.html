@@ -20,10 +20,12 @@
 
 <body>
     <div class="controlpanel">
+        <label>Experiment Control</label><br /><br />
         <input type="button" id="startbutton" value="Start" />
         <input type="button" id="stopbutton" value="Stop" />
     </div>
     <div class="controlpanel">
+        <label>Experiment Parameters</label><br /><br />
         <form name="ExpParams" id="ExpParams">
             Auto-trigger:
             <br>
@@ -44,6 +46,7 @@
         </form>
     </div>
     <div class="consolebox">
+        <label>Console</label><br /><br />
         <textarea id="localconsole" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
     <div class="container">
@@ -51,13 +54,15 @@
         <input type="button" id="clearbutton" value="Clear" />
     </div>
     <div class="container">
+        <label>Save/Export</label><br /><br />
+        <input type="button" id="savedatabutton" value="Export to" />
+        <select name="exportformatselect" id="exportformatselect">
+            <option selected>JSON</option>
+            <option>Mathematica</option>
+        </select>
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
-        <input type="button" id="openinmma" value="Open in Mathematica" />
-        <input type="button" id="savedatabutton" value="Save to" />
-        <input type="text" id="savepathtextbox" value="C:\data\data.json" />
-        <label>
-            <input type="checkbox" name="eosautosavecheckbox" id="eosautosavecheckbox" value="eosStop" />Autosave on end-of-Scan
-        </label>
+        <br>
+        <a id="downloadlink" href="" target="_blank" hidden>Data ready for Export: Click to download.</a>
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
 
@@ -74,24 +79,35 @@
             var pHub = $.connection.plotHub;
 
             // Create a function that the hub can call to plot the data.
-            pHub.client.pushData = function (data) {
+            pHub.client.pushLatestData = function (data) {
 
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
                 //Keep data and experimental parameters on screen:
-                $('#rawData').val(function () {
-                    var exp = { 'params': getExperimentParameters() , 'data' : jData};
-                    return JSON.stringify(exp, null, '\t');
-                });
+                
                 clearData();
                 appendData(document.getElementById("plot"), jData);
 
+            };
+
+            pHub.client.pushAllDataToTextArea = function (data) {
+                /*$('#rawData').val(function () {
+                    var exp = { 'params': getExperimentParameters(), 'data': jData };
+                    return JSON.stringify(exp, null, '\t');
+                });*/
+                $('#rawData').val(data);
             };
 
             //The console, which the hub can call to print information
             pHub.client.toConsole = function (s) {
                 $('#localconsole').val($('#localconsole').val() + '\n' + s);
                 $('#localconsole').scrollTop($('#localconsole')[0].scrollHeight);
+            };
+
+            //This is called by the server once the mma Notebook is ready
+            pHub.client.displayDownloadLink = function (link) {
+                $('#downloadlink').attr("href", link);
+                $('#downloadlink').show();
             };
 
             // Start the connection! Herein are start and stop functions, which interact with the experiment.
@@ -115,16 +131,10 @@
                 });
 
                 $('#savedatabutton').click(function () {
-                    pHub.server.saveExperiment($('#savepathtextbox').val());
+                    pHub.server.saveExperiment($('#exportformatselect').val());
                 });
 
-                $('#openinmma').click(function () {
-                    pHub.server.openMathematicaNotebook();
-                });
             });
-
-
-
         });
 
         //Clears data in plot
@@ -156,9 +166,6 @@
                 'AutoStart': document.querySelector('#AutoStart').value,
                 'TriggerAddress': '/dev1/PFI0',
                 'Sleep': document.querySelector('#Sleep').value,
-                'eosStop': document.querySelector('#eosstopcheckbox').checked,
-                'eosSave': document.querySelector('#eosautosavecheckbox').checked,
-                'savePath': document.querySelector('#savepathtextbox').value,
                 'DDSAddress': 'ASRL3::INSTR',
                 'ScanParameter': 'frequency'
             };

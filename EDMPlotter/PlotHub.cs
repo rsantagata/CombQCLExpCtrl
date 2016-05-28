@@ -28,14 +28,9 @@ namespace EDMPlotter
             ExperimentControl.Instance.StopExperiment();
         }
 
-        public void SaveExperiment(string path)
+        public void SaveExperiment(string format)
         {
-            ExperimentControl.Instance.Save(path);
-        }
-
-        public void OpenMathematicaNotebook()
-        {
-            ExperimentControl.Instance.GenerateMMANotebook();
+            ExperimentControl.Instance.Save(format);
         }
 
     }
