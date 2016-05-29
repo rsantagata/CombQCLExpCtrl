@@ -64,7 +64,7 @@
         </select>
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
         <br>
-        <a id="downloadlink" href="" target="_blank" hidden>Data ready for Export: Click to download.</a>
+        <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: Click to download.</a>
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
 
@@ -104,7 +104,8 @@
 
             //This is called by the server once the mma Notebook is ready
             pHub.client.displayDownloadLink = function (link) {
-                $('#downloadlink').attr("href", link);
+                $('#downloadlink').attr({href : link, target : '_blank'});
+                //$('#downloadlink').attr("download", link.split('\\').pop());
                 $('#downloadlink').show();
             };
 
