@@ -59,6 +59,8 @@
         <select name="exportformatselect" id="exportformatselect">
             <option selected>JSON</option>
             <option>Mathematica</option>
+            <option>CSV</option>
+            <option>TSV</option>
         </select>
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
         <br>
@@ -91,10 +93,6 @@
             };
 
             pHub.client.pushAllDataToTextArea = function (data) {
-                /*$('#rawData').val(function () {
-                    var exp = { 'params': getExperimentParameters(), 'data': jData };
-                    return JSON.stringify(exp, null, '\t');
-                });*/
                 $('#rawData').val(data);
             };
 

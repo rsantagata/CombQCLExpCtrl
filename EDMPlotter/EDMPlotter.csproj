@@ -108,10 +108,13 @@
     <Content Include="Scripts\jquery-2.2.3.min.js" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSVExportHelper.cs" />
     <Compile Include="ExperimentControl.cs" />
-    <Compile Include="MMANotebookHelper.cs" />
+    <Compile Include="JsonExportHelper.cs" />
+    <Compile Include="MathematicaExportHelper.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="PlotHub.cs" />
+    <Compile Include="TSVExportHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="web.config" />

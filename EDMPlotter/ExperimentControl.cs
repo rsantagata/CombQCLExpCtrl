@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.IO;
 using System.Threading;
 using Microsoft.AspNet.SignalR;
@@ -10,7 +8,7 @@ using Newtonsoft.Json;
 using DAQ;
 using SharedCode;
 using Wolfram.NETLink;
-using System.Diagnostics;
+
 
 namespace EDMPlotter
 {
@@ -108,6 +106,16 @@ namespace EDMPlotter
                     outputData = saveDataToMMANotebook(path);
                     
                 }
+                if(format.Equals("CSV"))
+                {
+                    string path = @"C:\Users\Equipe\Documents\GitHub\CombQCLExpCtrl\EDMPlotter\tmp\tempcsv.csv";
+                    outputData = saveDataToCSV(path);
+                }
+                if (format.Equals("TSV"))
+                {
+                    string path = @"C:\Users\Equipe\Documents\GitHub\CombQCLExpCtrl\EDMPlotter\tmp\temptsv.tsv";
+                    outputData = saveDataToTSV(path);
+                }
                 Clients.All.pushAllDataToTextArea(outputData);
                 Clients.All.toConsole("Data Saved.");
             }
@@ -147,15 +155,38 @@ namespace EDMPlotter
 
         #region private 
 
-        string getJSONString()
+        string saveDataToTSV(string path)
         {
-            string jsontext = "{ \"params\" : " + JsonConvert.SerializeObject(parameters, Formatting.Indented);
-            for (int i = 0; i < dataArchive.Count; i++)
+            string tsv = "";
+            try
             {
-                jsontext += ", \"data_" + i.ToString() + "\": " + dataArchive[i].ToJson(Formatting.Indented);
+                tsv = TSVExportHelper.GetTSVString(parameters, dataArchive);
+                File.WriteAllText(path, tsv);
+                Clients.All.toConsole("Preparing new CSV file at: " + path);
+                Clients.All.displayDownloadLink(path);
             }
-            jsontext += "}";
-            return jsontext;
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return tsv;
+        }
+
+        string saveDataToCSV(string path)
+        {
+            string csv = "";
+            try
+            {
+                csv = CSVExportHelper.GetCSVString(parameters, dataArchive);
+                File.WriteAllText(path, csv);
+                Clients.All.toConsole("Preparing new CSV file at: " + path);
+                Clients.All.displayDownloadLink(path);
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return csv;
         }
 
         string saveDataToJSON(string path)
@@ -163,12 +194,10 @@ namespace EDMPlotter
             string jsontext = "";
             try
             {
-                jsontext = getJSONString();   
+                jsontext = JsonExportHelper.GetJSONString(parameters, dataArchive);   
                 File.WriteAllText(path, jsontext);
-                Clients.All.toConsole("Preparing new Mathematica notebook at: " + path);
+                Clients.All.toConsole("Preparing new Json file at: " + path);
                 Clients.All.displayDownloadLink(path);
-                //Use this if saving (only!) the data to a CSV/TSV file. Turned off for the moment.
-                //dataSet.Save(path);
             }
             catch (IOException e)
             {
@@ -182,9 +211,9 @@ namespace EDMPlotter
             string mmaFormat = "";
             try
             {
-                mmaFormat = MMANotebookHelper.PrepareDataForMMA(dataArchive, parameters);
+                mmaFormat = MathematicaExportHelper.PrepareDataForMMA(dataArchive, parameters);
                 //Clients.All.toConsole(mmaFormat);
-                string location = MMANotebookHelper.CreateNotebook(mmaFormat, path, new MathKernel(), true);
+                string location = MathematicaExportHelper.CreateNotebook(mmaFormat, path, new MathKernel(), true);
                 Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
                 Clients.All.displayDownloadLink(location);
             }

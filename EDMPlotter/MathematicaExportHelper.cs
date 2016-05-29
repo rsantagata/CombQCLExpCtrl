@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Wolfram.NETLink;
 using System.IO;
 using SharedCode;
@@ -10,7 +8,7 @@ using System.Reflection;
 namespace EDMPlotter
 {
 
-    public static class MMANotebookHelper
+    public static class MathematicaExportHelper
     {
         
         public static string PrepareDataForMMA(List<DataSet> d, ExperimentParameters parameters)
