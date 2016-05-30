@@ -38,7 +38,8 @@ namespace DAQ
                 {
                     //Add VISA command here.
                     DataPoint d = new DataPoint(parameters.ScanParameter, i);
-                    dds.Write("*IDN?\n");
+                    //dds.Write("*IDN?\n");
+                    Console.Out.Write(dds.SetFrequency(i * Math.Exp(6)));
 
                     //Reading AIs for this position in scan
                     d.Add(parameters.AINames, daq.ReadAI());

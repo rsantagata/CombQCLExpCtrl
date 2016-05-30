@@ -15,11 +15,13 @@ namespace EDMPlotter
         {
             string result = "";
             result += convertParams(parameters);
-            for(int i = 0; i < d.Count; i++)
+            result += "params[\"NumberOfScans\"] = " + d.Count + ";\n";
+            for (int i = 0; i < d.Count; i++)
             {
                 result += convertData(d[i], parameters, i);
             }
-            result += "params[\"numberOfScans\"] = " + d.Count + ";\n";
+            
+
             return result;
         }
 
@@ -49,7 +51,7 @@ namespace EDMPlotter
         {
             string result = "";
             double[] scanParameterValues = d.GetAllValuesOfKey(parameters.ScanParameter);
-            result += "data[" + index.ToString() + ", \"" + parameters.ScanParameter + "\"] = {";
+            result += "data[" + (index + 1).ToString() + ", \"" + parameters.ScanParameter + "\"] = {";
             foreach (double val in scanParameterValues)
             {
                 result += val.ToString() + ",";
@@ -86,11 +88,16 @@ namespace EDMPlotter
 
         public static string CreateNotebook(string mathCommand, string fileLocation, MathKernel kernel)
         {
+            //Add common functions here;
+            string commonFuncs = "getScan[index_] := Transpose[{data[index, params[\"ScanParameter\"]], data[index, #]}] & /@ params[\"AINames\"];\n";
+            commonFuncs += "PlotAll[] := Show[ListPlot[getScan[#], ImageSize -> 600], ListPlot[getScan[#], ImageSize -> 600, Joined -> True]] & /@ Range[1, params[\"NumberOfScans\"]]";
 
-            mathCommand = string.Format("{0}{1}{2}", "FullForm[ToBoxes[Defer[", mathCommand, "]]]");         
+            mathCommand += commonFuncs;
+            mathCommand = string.Format("{0}{1}{2}", "FullForm[ToBoxes[Defer[", mathCommand, "]]]");
 
             mathCommand = ComputeMathCommand(mathCommand, kernel);
-            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[\"Import\", \"Section\"], Cell[BoxData[", mathCommand, "], \"Input\"], Cell[\"Analysis\", \"Section\"]}, WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}},StyleDefinitions->\"Default.nb\"]");
+            
+            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[\"Import\", \"Section\"], Cell[BoxData[", mathCommand, "], \"Input\"],  Cell[\"Analysis\", \"Section\"]}, WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}}, StyleDefinitions->\"Default.nb\"]");
 
             File.WriteAllText(fileLocation, mathCommand);
             kernel.Dispose();

@@ -51,7 +51,7 @@
     </div>
     <div class="container">
         <label>Save/Export</label><br /><br />
-        <input type="button" id="savedatabutton" value="Export to" />
+        <input type="button" id="exportdatabutton" value="Export to" />
         <select name="exportformatselect" id="exportformatselect">
             <option selected>JSON</option>
             <option>Mathematica</option>
@@ -60,12 +60,14 @@
         </select>
         <input type="button" id="copydatabutton" value="Copy to clipboard" />
         <br>
-        <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: Click to download.</a>
+        <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: right-click & select "Save target as" to download.</a><br />
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
     <div class="container">
         <div id="plot" style="left:10%;height:auto;width:80%;"></div>
         <input type="button" id="clearbutton" value="Clear" />
+        <input type="button" id="ampselectbutton" value="Select Amplitude" />
+        <label><input type="text" id="amptextbox" readonly hidden></label>
     </div>
    
 
@@ -89,7 +91,9 @@
                 //Keep data and experimental parameters on screen:
                 
                 clearData();
-                appendData(document.getElementById("plot"), jData);
+                var plot = document.getElementById("plot");
+                appendData(plot, jData);
+
 
             };
 
@@ -130,9 +134,11 @@
                     clearData();
                 });
 
-                $('#savedatabutton').click(function () {
+                $('#exportdatabutton').click(function () {
                     pHub.server.saveExperiment($('#exportformatselect').val());
                 });
+
+                
 
             });
         });
@@ -141,6 +147,23 @@
         var clearData = function () {
             deleteData(document.getElementById("plot"));
         };
+
+        //Allows user to select an amplitude
+        var amplitudeButton = document.querySelector('#ampselectbutton');
+        amplitudeButton.addEventListener('click',
+            function (data) {
+                $('#amptextbox').show();
+            });
+
+        $('#plot').on('plotly_click', function (data) {
+            var result = [];
+            for(i = 0; i < data.target._hoverdata.length; i++)
+            {
+                result.push(data.target._hoverdata[i].y);
+            }
+            $('#amptextbox').attr('value', result);               
+        });
+        
 
         //Manipulating the data once it's taken.
         var copyButton = document.querySelector('#copydatabutton');

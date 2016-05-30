@@ -30,7 +30,8 @@ function initialisePlot(domElement, expParams) {
         ],*/
         showLink: false,
         displaylogo: false,
-        scrollZoom: true
+        scrollZoom: true,
+        hovermode:'closest',
     });
     this.expParams = expParams;
 };
