@@ -213,7 +213,7 @@ namespace EDMPlotter
             {
                 mmaFormat = MathematicaExportHelper.PrepareDataForMMA(dataArchive, parameters);
                 //Clients.All.toConsole(mmaFormat);
-                string location = MathematicaExportHelper.CreateNotebook(mmaFormat, path, new MathKernel(), false);
+                string location = MathematicaExportHelper.CreateNotebook(mmaFormat, path, new MathKernel());
                 Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
                 Clients.All.displayDownloadLink(location);
             }

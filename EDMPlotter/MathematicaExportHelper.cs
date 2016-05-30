@@ -84,20 +84,13 @@ namespace EDMPlotter
             }
         }
 
-        public static string CreateNotebook(string mathCommand, string fileLocation, MathKernel kernel, bool addNewLines)
+        public static string CreateNotebook(string mathCommand, string fileLocation, MathKernel kernel)
         {
-            if (addNewLines)
-            {
-                mathCommand = string.Format("{0}{1}{2}", "Module[{boxoutput,b2},boxoutput=FullForm[ToBoxes[Defer[", mathCommand, "]]];b2=boxoutput[[1,1,3,1]];boxoutput[[1,1,3,1]]=Join[Flatten[Riffle[Partition[b2,2],\"\\[IndentingNewLine]\"],1],{\"\\[IndentingNewLine]\",Last[b2]}];boxoutput]");
-            }
-            else
-            {
-                mathCommand = string.Format("{0}{1}{2}", "FullForm[ToBoxes[Defer[", mathCommand, "]]]");
-            }
-            fileLocation = Path.ChangeExtension(fileLocation, ".nb");
+
+            mathCommand = string.Format("{0}{1}{2}", "FullForm[ToBoxes[Defer[", mathCommand, "]]]");         
 
             mathCommand = ComputeMathCommand(mathCommand, kernel);
-            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[BoxData[", mathCommand, "], \"Input\"]},WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}},StyleDefinitions->\"Default.nb\"]");
+            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[\"Import\", \"Section\"], Cell[BoxData[", mathCommand, "], \"Input\"], Cell[\"Analysis\", \"Section\"]}, WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}},StyleDefinitions->\"Default.nb\"]");
 
             File.WriteAllText(fileLocation, mathCommand);
             kernel.Dispose();
