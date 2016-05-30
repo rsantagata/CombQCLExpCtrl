@@ -50,10 +50,6 @@
         <textarea id="localconsole" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
     <div class="container">
-        <div id="plot" style="left:10%;height:auto;width:80%;"></div>
-        <input type="button" id="clearbutton" value="Clear" />
-    </div>
-    <div class="container">
         <label>Save/Export</label><br /><br />
         <input type="button" id="savedatabutton" value="Export to" />
         <select name="exportformatselect" id="exportformatselect">
@@ -67,6 +63,11 @@
         <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: Click to download.</a>
         <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
     </div>
+    <div class="container">
+        <div id="plot" style="left:10%;height:auto;width:80%;"></div>
+        <input type="button" id="clearbutton" value="Clear" />
+    </div>
+   
 
     <script type="text/javascript">
 

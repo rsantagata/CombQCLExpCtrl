@@ -60,7 +60,7 @@ namespace EDMPlotter
             foreach (string AIName in parameters.AINames)
             {
                 double[] values = d.GetAllValuesOfKey(AIName);
-                result += "data[" + index.ToString() + ", \"" + AIName + "\"] = {";
+                result += "data[" + (index + 1).ToString() + ", \"" + AIName + "\"] = {";
                 foreach (double val in values)
                 {
                     result += val.ToString() + ",";
