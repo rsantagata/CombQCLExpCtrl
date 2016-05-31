@@ -66,8 +66,6 @@
     <div class="container">
         <div id="plot" style="left:10%;height:auto;width:80%;"></div>
         <input type="button" id="clearbutton" value="Clear" />
-        <input type="button" id="ampselectbutton" value="Select Amplitude" />
-        <label><input type="text" id="amptextbox" readonly hidden></label>
     </div>
    
 
@@ -77,11 +75,12 @@
 
             $('#localconsole').val("Hi! Connecting to experiment now. Please wait.");
 
-            //Getting plot ready.
-            initialisePlot(document.getElementById("plot"), getExperimentParameters());
 
             // Declare a proxy to reference the hub.
             var pHub = $.connection.plotHub;
+
+            //Getting plot ready.
+            initialisePlot(document.getElementById("plot"), getExperimentParameters());
 
             // Create a function that the hub can call to plot the data.
             pHub.client.pushLatestData = function (data) {
@@ -148,23 +147,6 @@
             deleteData(document.getElementById("plot"));
         };
 
-        //Allows user to select an amplitude
-        var amplitudeButton = document.querySelector('#ampselectbutton');
-        amplitudeButton.addEventListener('click',
-            function (data) {
-                $('#amptextbox').show();
-            });
-
-        $('#plot').on('plotly_click', function (data) {
-            var result = [];
-            for(i = 0; i < data.target._hoverdata.length; i++)
-            {
-                result.push(data.target._hoverdata[i].y);
-            }
-            $('#amptextbox').attr('value', result);               
-        });
-        
-
         //Manipulating the data once it's taken.
         var copyButton = document.querySelector('#copydatabutton');
         copyButton.addEventListener('click', function (event) {
@@ -193,6 +175,7 @@
                 'ScanParameter': 'frequency'
             };
             return params;
-        }
+        };
+
     </script>
 </body>

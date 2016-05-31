@@ -3,20 +3,11 @@ var channelNames;
 var x_axis_name;
 var nameIndexLookup;
 
-var localIcons = {
-    'selectbox': {
-        'width': 1000,
-        'path': 'm0 850l0-143 143 0 0 143-143 0z m286 0l0-143 143 0 0 143-143 0z m285 0l0-143 143 0 0 143-143 0z m286 0l0-143 143 0 0 143-143 0z m-857-286l0-143 143 0 0 143-143 0z m857 0l0-143 143 0 0 143-143 0z m-857-285l0-143 143 0 0 143-143 0z m857 0l0-143 143 0 0 143-143 0z m-857-286l0-143 143 0 0 143-143 0z m286 0l0-143 143 0 0 143-143 0z m285 0l0-143 143 0 0 143-143 0z m286 0l0-143 143 0 0 143-143 0z',
-        'ascent': 850,
-        'descent': -150
-    }
-};
-
 
 function initialisePlot(domElement, expParams) {
     x_axis_name = expParams.ScanParameter;
     channelNames = expParams.AINames; //The others are the channels to plot.
-
+    
     nameIndexLookup = createLookupTable(channelNames);
     var initData = channelNames.map(function(d) {
         return { name: d, x: [], y: [] };
@@ -25,9 +16,6 @@ function initialisePlot(domElement, expParams) {
     //Create empty plot
     Plotly.newPlot(domElement, initData, { margin: { t: 50, b: 50, l: 50, r: 50 } }, {
         modeBarButtonsToRemove: ['sendDataToCloud', 'toImage'],
-        /*modeBarButtonsToAdd: [
-            [{ name: 'select2d', icon: localIcons.selectbox, title: 'select data', attr: 'dragmode', val: 'select', click: getSelectedData }]
-        ],*/
         showLink: false,
         displaylogo: false,
         scrollZoom: true,
