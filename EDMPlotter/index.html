@@ -175,7 +175,12 @@
                 'TriggerAddress': '/dev1/PFI0',
                 'Sleep': document.querySelector('#Sleep').value,
                 'DDSAddress': 'ASRL3::INSTR',
-                'ScanParameter': 'frequency'
+                'ScanParameter': 'frequency',
+                'ModulationFrequency': 1000,
+                'MaxModulationHarmonic': 1,
+                'NumberOfSamplesPerIntegrationTime': 500,
+                'SampleRate': 10000,
+                'MustDemodulate' : true
             };
             return params;
         };

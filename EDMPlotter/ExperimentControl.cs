@@ -253,7 +253,10 @@ namespace EDMPlotter
             'AutoStart': 'false',
             'TriggerAddress': '/dev1/PFI0',
             'SampleRate': '200',
-            'DDSAddress' : 'ASRL3::INSTR'
+            'DDSAddress' : 'ASRL3::INSTR',
+            'ModulationFrequency' : 1000,
+            'MaxModulationHarmonic' : 1,
+            'NumberOfSamplesPerIntegrationTime' : 500
             }
             ";
                 parameters = JsonConvert.DeserializeObject<ExperimentParameters>(jsonParams);

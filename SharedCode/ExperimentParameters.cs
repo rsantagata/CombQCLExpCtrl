@@ -16,5 +16,11 @@ namespace SharedCode
         public int Sleep { get; set; }
         public string DDSAddress { get; set; }
         public string ScanParameter { get; set; }
+        public double ModulationFrequency { get; set; }
+        public int MaxModulationHarmonic { get; set; }
+        public int NumberOfSamplesPerIntegrationTime { get; set; }
+        public int SampleRate { get; set; }
+        public bool MustDemodulate { get; set; }
+
     }
 }
