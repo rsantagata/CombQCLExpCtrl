@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CSVExportHelper.cs" />
+    <Compile Include="EvernoteDispatcher.cs" />
     <Compile Include="ExperimentControl.cs" />
     <Compile Include="JsonExportHelper.cs" />
     <Compile Include="MathematicaExportHelper.cs" />

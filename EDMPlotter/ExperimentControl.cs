@@ -22,6 +22,7 @@ namespace EDMPlotter
         ExperimentParameters parameters;
         enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
         ExperimentState es;
+        EvernoteDispatcher ed;
 
         object keepRunningCheckLock = new object();
 
@@ -34,6 +35,7 @@ namespace EDMPlotter
             Clients = clients;
             exp = new CombQCLScanHardware();
             //hardware = new FakeHardware();
+            ed = new EvernoteDispatcher(this);
 
             es = ExperimentState.IsStopped;
             Clients.All.toConsole("Experiment is ready.");
@@ -61,7 +63,7 @@ namespace EDMPlotter
             {
 
                 es = ExperimentState.IsStarting;
-                Clients.All.toConsole("Starting...");
+                ToConsole("Starting...");
                 initialiseExperimentalParameters(jsonParams);
 
                 dataArchive = new List<DataSet>();
@@ -70,7 +72,7 @@ namespace EDMPlotter
                 experimentThread.Start();
 
                 es = ExperimentState.IsRunning;
-                Clients.All.toConsole("Thread started. Running experiment sequence.");
+                ToConsole("Thread started. Running experiment sequence.");
 
                 //Data should be coming in here; As fake data, generate a point every 0.5 seconds.
             }
@@ -79,13 +81,13 @@ namespace EDMPlotter
         {
             if (experimentThread.IsAlive)
             {
-                Clients.All.toConsole("Stopping...");
+                ToConsole("Stopping...");
                 es = ExperimentState.IsFinishing;
                 experimentThread.Join();
             }
             else
             {
-                Clients.All.toConsole("Experiment seems to be stopped already.");
+                ToConsole("Experiment seems to be stopped already.");
             }
         }
 
@@ -117,13 +119,22 @@ namespace EDMPlotter
                     outputData = saveDataToTSV(path);
                 }
                 Clients.All.pushAllDataToTextArea(outputData);
-                Clients.All.toConsole("Data Saved.");
+                ToConsole("Data Saved.");
             }
             else
             {
-                Clients.All.toConsole("Cannot save data. Experiment is still running.");
+                ToConsole("Cannot save data. Experiment is still running.");
             }
 
+        }
+        public void StoreAsEvernote()
+        {
+            ed.SendToEvernote(dataArchive.ToArray());
+        }
+
+        public void ToConsole(string s)
+        {
+            Clients.All.toConsole(s);
         }
 
         #endregion
@@ -131,10 +142,10 @@ namespace EDMPlotter
         #region RUN
         void run()
         {
-            Clients.All.toConsole("Initialising hardware.");
+            ToConsole("Initialising hardware.");
             exp.Initialise(parameters);
 
-            Clients.All.toConsole("Acquiring data...");
+            ToConsole("Acquiring data...");
             int numberOfScans = 0;
             while (es.Equals(ExperimentState.IsRunning))
             {
@@ -144,11 +155,11 @@ namespace EDMPlotter
                 dataArchive.Add(currentDataSet);
                 numberOfScans++;
             }
-            Clients.All.toConsole("Acquisition complete.");
-            Clients.All.toConsole("Disposing hardware classes...");
+            ToConsole("Acquisition complete.");
+            ToConsole("Disposing hardware classes...");
             exp.Dispose();
-            Clients.All.toConsole("Disposed.");
-            Clients.All.toConsole("Setting ExperimentState to stopped and closing thread...");
+            ToConsole("Disposed.");
+            ToConsole("Setting ExperimentState to stopped and closing thread...");
             es = ExperimentState.IsStopped;
         }
         #endregion
@@ -162,7 +173,7 @@ namespace EDMPlotter
             {
                 tsv = TSVExportHelper.GetTSVString(parameters, dataArchive);
                 File.WriteAllText(path, tsv);
-                Clients.All.toConsole("Preparing new CSV file at: " + path);
+                ToConsole("Preparing new CSV file at: " + path);
                 Clients.All.displayDownloadLink(path);
             }
             catch (IOException e)
@@ -179,7 +190,7 @@ namespace EDMPlotter
             {
                 csv = CSVExportHelper.GetCSVString(parameters, dataArchive);
                 File.WriteAllText(path, csv);
-                Clients.All.toConsole("Preparing new CSV file at: " + path);
+                ToConsole("Preparing new CSV file at: " + path);
                 Clients.All.displayDownloadLink(path);
             }
             catch (IOException e)
@@ -196,7 +207,7 @@ namespace EDMPlotter
             {
                 jsontext = JsonExportHelper.GetJSONString(parameters, dataArchive);   
                 File.WriteAllText(path, jsontext);
-                Clients.All.toConsole("Preparing new Json file at: " + path);
+                ToConsole("Preparing new Json file at: " + path);
                 Clients.All.displayDownloadLink(path);
             }
             catch (IOException e)
@@ -214,7 +225,7 @@ namespace EDMPlotter
                 mmaFormat = MathematicaExportHelper.PrepareDataForMMA(dataArchive, parameters);
                 //Clients.All.toConsole(mmaFormat);
                 string location = MathematicaExportHelper.CreateNotebook(mmaFormat, path, new MathKernel());
-                Clients.All.toConsole("Preparing new Mathematica notebook at: " + location);
+                ToConsole("Preparing new Mathematica notebook at: " + location);
                 Clients.All.displayDownloadLink(location);
             }
             catch (IOException e)
@@ -226,7 +237,7 @@ namespace EDMPlotter
 
         void initialiseExperimentalParameters(string jsonParams)
         {
-            Clients.All.toConsole("Reading experimental parameters...");
+            ToConsole("Reading experimental parameters...");
             try
             {
                 parameters = JsonConvert.DeserializeObject<ExperimentParameters>(jsonParams);

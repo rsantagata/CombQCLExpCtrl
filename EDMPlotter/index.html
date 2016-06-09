@@ -51,6 +51,7 @@
     </div>
     <div class="container">
         <label>Save/Export</label><br /><br />
+        <input type="button" id="toevernotebutton" value="Backup to Evernote" />
         <input type="button" id="exportdatabutton" value="Export to" />
         <select name="exportformatselect" id="exportformatselect">
             <option selected>JSON</option>
@@ -137,7 +138,9 @@
                     pHub.server.saveExperiment($('#exportformatselect').val());
                 });
 
-                
+                $('#toevernotebutton').click(function () {
+                    pHub.server.backupExperimentData();
+                });
 
             });
         });
