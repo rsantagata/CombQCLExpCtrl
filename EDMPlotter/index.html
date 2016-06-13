@@ -78,13 +78,13 @@
 
 
             // Declare a proxy to reference the hub.
-            var pHub = $.connection.plotHub;
+            var expHub = $.connection.experimentHub;
 
             //Getting plot ready.
             initialisePlot(document.getElementById("plot"), getExperimentParameters());
 
             // Create a function that the hub can call to plot the data.
-            pHub.client.pushLatestData = function (data) {
+            expHub.client.pushLatestData = function (data) {
 
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
@@ -97,18 +97,18 @@
 
             };
 
-            pHub.client.pushAllDataToTextArea = function (data) {
+            expHub.client.pushAllDataToTextArea = function (data) {
                 $('#rawData').val(data);
             };
 
             //The console, which the hub can call to print information
-            pHub.client.toConsole = function (s) {
+            expHub.client.toConsole = function (s) {
                 $('#localconsole').val($('#localconsole').val() + '\n' + s);
                 $('#localconsole').scrollTop($('#localconsole')[0].scrollHeight);
             };
 
             //This is called by the server once the mma Notebook is ready
-            pHub.client.displayDownloadLink = function (link) {
+            expHub.client.displayDownloadLink = function (link) {
                 $('#downloadlink').attr({href : link, target : '_blank'});
                 //$('#downloadlink').attr("download", link.split('\\').pop());
                 $('#downloadlink').show();
@@ -119,13 +119,13 @@
 
                 $('#startbutton').click(function () {
                     // Call the Start method on the hub.
-                    pHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
+                    expHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
 
                 });
 
                 $('#stopbutton').click(function () {
                     // Call the Stop method on the hub.
-                    pHub.server.stopExperiment();
+                    expHub.server.stopExperiment();
 
                 });
 
@@ -135,11 +135,11 @@
                 });
 
                 $('#exportdatabutton').click(function () {
-                    pHub.server.saveExperiment($('#exportformatselect').val());
+                    expHub.server.saveExperiment($('#exportformatselect').val());
                 });
 
                 $('#toevernotebutton').click(function () {
-                    pHub.server.backupExperimentData();
+                    expHub.server.backupExperimentData();
                 });
 
             });
@@ -168,19 +168,30 @@
         var getExperimentParameters = function () {
             //Stuff that doesn't change very often can be hardcoded here.
             var params = {
-                'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
-                'AINames': ['dc', '1f', '2f'],
-                'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
-                'AutoStart': document.querySelector('#AutoStart').value,
-                'TriggerAddress': '/dev1/PFI0',
-                'Sleep': document.querySelector('#Sleep').value,
-                'DDSAddress': 'ASRL3::INSTR',
-                'ScanParameter': 'frequency',
-                'ModulationFrequency': 1000,
-                'MaxModulationHarmonic': 1,
-                'NumberOfSamplesPerIntegrationTime': 500,
-                'SampleRate': 10000,
-                'MustDemodulate' : true
+                'DAQmx' : {
+                    'AINames': ['dc', '1f', '2f'],
+                    'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
+                    'AutoStart': document.querySelector('#AutoStart').value,
+                    'TriggerAddress': '/dev1/PFI0',
+                    'SampleRate': 10000,
+                    'NumberOfSamplesPerIntegrationTime': 1,
+                    'LockinParams': {
+                        'ModulationFrequency': 1000,
+                        'MaxModulationHarmonic': 1,
+                        'MustDemodulate': false
+                    }
+                },
+
+                'DDS' : {
+                    'DDSAddress': 'ASRL3::INSTR'
+                },
+
+                'ScanParams' : {
+                    'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
+                    'Sleep': document.querySelector('#Sleep').value,
+                    'ScanParameterName': 'frequency'
+                }
+
             };
             return params;
         };

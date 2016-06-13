@@ -1,26 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Newtonsoft.Json;
+﻿using System.Reflection;
 
 namespace SharedCode
 {
-    public class ExperimentParameters
+    public class ExperimentParameters : Parameters
     {
-        public int NumberOfPoints { get; set; }
-        public string[] AINames { get; set; }
-        public string[] AIAddresses { get; set; }
-        public bool AutoStart { get; set; }
-        public string TriggerAddress { get; set; }
-        public int Sleep { get; set; }
-        public string DDSAddress { get; set; }
-        public string ScanParameter { get; set; }
-        public double ModulationFrequency { get; set; }
-        public int MaxModulationHarmonic { get; set; }
-        public int NumberOfSamplesPerIntegrationTime { get; set; }
-        public int SampleRate { get; set; }
-        public bool MustDemodulate { get; set; }
+        public ScanParameters ScanParams { get; set; }
+        public DDSParameters DDS { get; set; }
+        public DAQmxParameters DAQmx { get; set; }
 
     }
 }

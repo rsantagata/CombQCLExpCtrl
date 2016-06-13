@@ -15,7 +15,7 @@ namespace EDMPlotter
         {
             string result = "";
             result += convertParams(parameters);
-            result += "params[\"NumberOfScans\"] = " + d.Count + ";\n";
+            result += "ScanParams[\"NumberOfScans\"] = " + d.Count + ";\n";
             for (int i = 0; i < d.Count; i++)
             {
                 result += convertData(d[i], parameters, i);
@@ -25,33 +25,49 @@ namespace EDMPlotter
             return result;
         }
 
-        static string convertParams(ExperimentParameters p)
+        //Gets called recursively to parse the various parameter classes inside ExperimentParametrs.
+        //An array gets special treatment so that it parses to a mathematica list correctly.
+        static string convertParams(string paramLabel, Parameters p)
         {
-            string parameters = "";
+            string localParams = "";
             foreach (PropertyInfo i in p.GetType().GetProperties())
             {
+   
                 object o = i.GetValue(p, null);
-                if(o.GetType().IsArray)
+                if (o.GetType().IsSubclassOf(typeof(Parameters)))
                 {
-                    parameters += "params[\"" + i.Name + "\"] = {";
-                    foreach (object obj in (object[])o)
-                    {
-                        parameters += toMMAValue(obj) + ",";
-                    }
-                    parameters = parameters.Remove(parameters.Length - 1) + "};\n"; //Cheezy way of removing the last comma
+                    localParams += convertParams(i.Name, (Parameters)o);
                 }
                 else
                 {
-                    parameters += "params[\"" + i.Name + "\"] = " + toMMAValue(o) + ";\n";
-                }                
+                    if (o.GetType().IsArray)
+                    {
+                        localParams += paramLabel + "[\"" + i.Name + "\"] = {";
+                        foreach (object obj in (object[])o)
+                        {
+                            localParams += toMMAValue(obj) + ",";
+                        }
+                        localParams = localParams.Remove(localParams.Length - 1) + "};\n"; //Cheezy way of removing the last comma
+                    }
+                    else
+                    {
+                        localParams += paramLabel + "[\"" + i.Name + "\"] = " + toMMAValue(o) + ";\n";
+                    }
+                }            
             }
-            return parameters;
+            return localParams;
+        }
+
+        static string convertParams(Parameters p)
+        {
+            string paramLabel = p.GetType().Name;
+            return convertParams(paramLabel, p);
         }
         static string convertData(DataSet d, ExperimentParameters parameters, int index)
         {
             string result = "";
-            double[] scanParameterValues = d.GetAllValuesOfKey(parameters.ScanParameter);
-            result += "data[" + (index + 1).ToString() + ", \"" + parameters.ScanParameter + "\"] = {";
+            double[] scanParameterValues = d.GetAllValuesOfKey(parameters.ScanParams.ScanParameterName);
+            result += "data[" + (index + 1).ToString() + ", \"" + parameters.ScanParams.ScanParameterName + "\"] = {";
             foreach (double val in scanParameterValues)
             {
                 result += val.ToString() + ",";
@@ -59,7 +75,7 @@ namespace EDMPlotter
             result = result.Remove(result.Length - 1); //Cheezy way of removing the last comma
             result += "};\n";
 
-            foreach (string AIName in parameters.AINames)
+            foreach (string AIName in parameters.DAQmx.AINames)
             {
                 double[] values = d.GetAllValuesOfKey(AIName);
                 result += "data[" + (index + 1).ToString() + ", \"" + AIName + "\"] = {";
@@ -89,15 +105,14 @@ namespace EDMPlotter
         public static string CreateNotebook(string mathCommand, string fileLocation, MathKernel kernel)
         {
             //Add common functions here;
-            string commonFuncs = "getScan[index_] := Transpose[{data[index, params[\"ScanParameter\"]], data[index, #]}] & /@ params[\"AINames\"];\n";
-            commonFuncs += "PlotAll[] := Show[ListPlot[getScan[#], ImageSize -> 600], ListPlot[getScan[#], ImageSize -> 600, Joined -> True]] & /@ Range[1, params[\"NumberOfScans\"]]";
+            string commonFuncs = "GetScan[index_] := Transpose[{data[index, ScanParams[\"ScanParameterName\"]], data[index, #]}] & /@ DAQmx[\"AINames\"];\n";
+            commonFuncs += "PlotAll[] := Show[ListPlot[GetScan[#], ImageSize -> 600], ListPlot[GetScan[#], ImageSize -> 600, Joined -> True]] & /@ Range[1, ScanParams[\"NumberOfScans\"]];\n";
 
             mathCommand += commonFuncs;
             mathCommand = string.Format("{0}{1}{2}", "FullForm[ToBoxes[Defer[", mathCommand, "]]]");
-
+            //
             mathCommand = ComputeMathCommand(mathCommand, kernel);
-            
-            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[\"Import\", \"Section\"], Cell[BoxData[", mathCommand, "], \"Input\"],  Cell[\"Analysis\", \"Section\"]}, WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}}, StyleDefinitions->\"Default.nb\"]");
+            mathCommand = string.Format("{0}{1}{2}", "Notebook[{Cell[\"Import\", \"Section\"], Cell[BoxData[", mathCommand, "], \"Input\"],  Cell[\"Analysis\", \"Section\"]}, WindowSize->{615, 750}, WindowMargins->{{328, Automatic}, {Automatic, 76}}]");
 
             File.WriteAllText(fileLocation, mathCommand);
             kernel.Dispose();

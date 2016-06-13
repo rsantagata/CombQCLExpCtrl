@@ -15,7 +15,7 @@ namespace EDMPlotter
     public class ExperimentControl //: IDataDroppable
     {
         #region Declarations, constructors, accessors
-        private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<PlotHub>().Clients));
+        private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<ExperimentHub>().Clients));
 
         List<DataSet> dataArchive;
         DataSet currentDataSet;
@@ -59,22 +59,33 @@ namespace EDMPlotter
         #region public
         public void StartExperiment(string jsonParams)
         {
+            bool IsParamsReadable = false;
             if (es.Equals(ExperimentState.IsStopped))
             {
-
                 es = ExperimentState.IsStarting;
-                ToConsole("Starting...");
-                initialiseExperimentalParameters(jsonParams);
+                ToConsole("Starting. Reading experiment parameters...");
+                try
+                {
+                    initialiseExperimentalParameters(jsonParams);
+                    IsParamsReadable = true;
+                }
+                catch(ExperimentalParametersException e)
+                {
+                    ToConsole("Could not interpret experiment parameters. Please check and try again.");
+                    IsParamsReadable = false;
+                }
+                if (IsParamsReadable)
+                {
+                    dataArchive = new List<DataSet>();
 
-                dataArchive = new List<DataSet>();
+                    experimentThread = new Thread(new ThreadStart(run));
+                    experimentThread.Start();
 
-                experimentThread = new Thread(new ThreadStart(run));
-                experimentThread.Start();
+                    es = ExperimentState.IsRunning;
+                    ToConsole("Thread started. Running experiment sequence.");
 
-                es = ExperimentState.IsRunning;
-                ToConsole("Thread started. Running experiment sequence.");
-
-                //Data should be coming in here; As fake data, generate a point every 0.5 seconds.
+                    //Data should be coming in here; As fake data, generate a point every 0.5 seconds.
+                }
             }
         }
         public void StopExperiment()
@@ -245,21 +256,8 @@ namespace EDMPlotter
             catch (JsonException e)
             {
                 Clients.All.toConsole(e.Message);
-                Clients.All.toConsole("Loading default values.");
-                jsonParams = @"{
-            'NumberOfPoints': '1000',
-            'AINames': ['x_val', 'y_val', 'y_val1', 'y_val2'],
-            'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3', '/dev1/ai4'],
-            'AutoStart': 'false',
-            'TriggerAddress': '/dev1/PFI0',
-            'SampleRate': '200',
-            'DDSAddress' : 'ASRL3::INSTR',
-            'ModulationFrequency' : 1000,
-            'MaxModulationHarmonic' : 1,
-            'NumberOfSamplesPerIntegrationTime' : 500
-            }
-            ";
-                parameters = JsonConvert.DeserializeObject<ExperimentParameters>(jsonParams);
+                Clients.All.toConsole("Could not initialise hardware. Stopping.");
+                throw new ExperimentalParametersException();
             }
 
         }
@@ -281,4 +279,20 @@ namespace EDMPlotter
         }*/
     }
     #endregion
+
+    public class ExperimentalParametersException : Exception
+    {
+        public ExperimentalParametersException()
+        {
+        }
+
+        public ExperimentalParametersException(string message) : base(message)
+        {
+        }
+
+        public ExperimentalParametersException(string message, Exception inner)
+        : base(message, inner)
+        {
+        }
+    }
 }

@@ -13,9 +13,9 @@ namespace DAQ
 {
     public static class NumLockIn
     {
-        public static double GetAmplitude(double[] amps, double modulationFreq, int maxHarmonic, ExperimentParameters parameters)
+        public static double GetAmplitude(double[] amps, double modulationFreq, int maxHarmonic, int samplesPerIntegrationTime, int sampleRate)
         {
-            double IntegrationTime = (double)parameters.NumberOfSamplesPerIntegrationTime / parameters.SampleRate;
+            double IntegrationTime = (double)samplesPerIntegrationTime / sampleRate;
             Complex[] cAmps = new Complex[amps.Length];
             for(int i = 0; i < amps.Length; i++)
             {

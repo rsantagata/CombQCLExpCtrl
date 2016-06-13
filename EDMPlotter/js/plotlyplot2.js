@@ -5,8 +5,8 @@ var nameIndexLookup;
 
 
 function initialisePlot(domElement, expParams) {
-    x_axis_name = expParams.ScanParameter;
-    channelNames = expParams.AINames; //The others are the channels to plot.
+    x_axis_name = expParams.ScanParams.ScanParameterName;
+    channelNames = expParams.DAQmx.AINames; //The others are the channels to plot.
     
     nameIndexLookup = createLookupTable(channelNames);
     var initData = channelNames.map(function(d) {

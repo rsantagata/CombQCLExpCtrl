@@ -23,8 +23,8 @@ namespace SharedCode
 			Random rnd = new Random();
 			lock (updateDataLock)
 			{
-				for (int i = 0; i < parameters.NumberOfPoints; i++) {
-                    data.Add(new DataPoint(parameters.AINames, new double[] 
+				for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++) {
+                    data.Add(new DataPoint(parameters.DAQmx.AINames, new double[] 
                     { i, rnd.Next(-1, 1) + 10 * Math.Cos(0.1 * i), rnd.Next(-1, 1) + 10 * Math.Cos(0.1 * i + 1.5) ,  rnd.Next(-1, 1) + 10 * Math.Cos(0.1 * i + 2.5) }));
 				}
 			}

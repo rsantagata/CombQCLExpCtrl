@@ -7,13 +7,13 @@ using Newtonsoft.Json;
 
 namespace EDMPlotter
 {
-    public class PlotHub : Hub
+    public class ExperimentHub : Hub
     {
         private readonly ExperimentControl _experiment;
 
-        public PlotHub() : this(ExperimentControl.Instance) { }
+        public ExperimentHub() : this(ExperimentControl.Instance) { }
 
-        public PlotHub(ExperimentControl e)
+        public ExperimentHub(ExperimentControl e)
         {
             _experiment = e;
         }

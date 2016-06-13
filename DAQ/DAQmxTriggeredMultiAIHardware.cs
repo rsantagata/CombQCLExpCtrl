@@ -10,7 +10,8 @@ namespace DAQ
         private AnalogMultiChannelReader analogReader;
         private Task readAIsTask;
         DataSet data;
-        ExperimentParameters parameters;
+        DAQmxParameters parameters;
+        LockinAmplifierParameters lockinParams;
 
         #region public region
         
@@ -34,7 +35,7 @@ namespace DAQ
             }
             double[] result = new double[parameters.AIAddresses.Length];
 
-            if(parameters.MustDemodulate)
+            if (lockinParams.MustDemodulate)
             {
                 for (int i = 0; i < result.Length; i++)
                 {
@@ -43,7 +44,8 @@ namespace DAQ
                     {
                         temp[j] = data[i, j];
                     }
-                    result[i] = NumLockIn.GetAmplitude(temp, parameters.ModulationFrequency, parameters.MaxModulationHarmonic, parameters);
+                    result[i] = NumLockIn.GetAmplitude(temp, lockinParams.ModulationFrequency, lockinParams.MaxModulationHarmonic, 
+                        parameters.NumberOfSamplesPerIntegrationTime, parameters.SampleRate);
                 }
             }
             else
@@ -60,9 +62,10 @@ namespace DAQ
             return result;
         }
 
-        public void ConfigureAI(ExperimentParameters p)
+        public void ConfigureAI(DAQmxParameters p)
         {
             parameters = p;
+            lockinParams = p.LockinParams;
             data = new DataSet();
             readAIsTask = new Task("readAI");
 

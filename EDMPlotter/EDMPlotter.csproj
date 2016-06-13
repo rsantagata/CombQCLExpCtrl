@@ -114,7 +114,7 @@
     <Compile Include="JsonExportHelper.cs" />
     <Compile Include="MathematicaExportHelper.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="PlotHub.cs" />
+    <Compile Include="ExperimentHub.cs" />
     <Compile Include="TSVExportHelper.cs" />
   </ItemGroup>
   <ItemGroup>

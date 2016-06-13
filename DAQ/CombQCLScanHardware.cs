@@ -23,9 +23,9 @@ namespace DAQ
             parameters = p;
 
             daq = new DAQmxTriggeredMultiAIHardware();
-            daq.ConfigureAI(parameters);
+            daq.ConfigureAI(parameters.DAQmx);
             
-            dds = new USBVisaDDS(parameters.DDSAddress);
+            dds = new USBVisaDDS(parameters.DDS.DDSAddress);
             dds.Connect();
         }
 
@@ -34,19 +34,19 @@ namespace DAQ
             data = new DataSet();
             lock (updateDataLock)
             {
-                for (int i = 0; i < parameters.NumberOfPoints; i++)
+                for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++)
                 {
+                    DataPoint d = new DataPoint(parameters.ScanParams.ScanParameterName, i);
                     //Add VISA command here.
-                    DataPoint d = new DataPoint(parameters.ScanParameter, i);
                     //dds.Write("*IDN?\n");
                     Console.Out.Write(dds.SetFrequency(i * Math.Exp(6)));
 
                     //Reading AIs for this position in scan
-                    d.Add(parameters.AINames, daq.ReadAI());
+                    d.Add(parameters.DAQmx.AINames, daq.ReadAI());
                     data.Add(d);
 
-                    //Even Measurement interval
-                    Thread.Sleep(parameters.Sleep);
+                    //Interval between measurements
+                    Thread.Sleep(parameters.ScanParams.Sleep);
                 }
             }
             return data;
