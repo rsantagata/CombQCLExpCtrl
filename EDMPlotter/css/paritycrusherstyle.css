@@ -1,0 +1,58 @@
+
+header {
+    text-align: center;
+    width: 100%;
+    background-color: black;
+    color: white;
+}
+
+section {
+    background-color: #d9d9f3;
+    border: solid #808080;
+    min-height: 100px;
+    margin: 0%;
+    margin-top: 0.1%;
+    padding: 1%;
+}
+
+article {
+    background-color: #e5ebe4;
+    border: solid #808080;
+    min-height: 40px;
+    padding-left: 2.5%;
+    padding-right: 2.5%;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    margin-top:0.5%;
+}
+
+.console{
+    width: 97.3%;
+
+}
+
+.controlpanel{
+    width: 30%;
+    float: left;
+}
+
+.datadisplay{
+    width: 64.5%;
+    float: right;
+}
+
+.plot{
+    background-color: #ffffff;
+    float: left;
+    border: solid #808080;
+    width: 90%;
+    min-height: 400px;
+}
+
+.rawData{
+    background-color: #ffffff;
+    float: left;
+    border: solid #808080;
+    width: 90%;
+    min-height: 100px;
+}

@@ -2,10 +2,8 @@
 <meta charset="utf-8">
 
 <head>
-    <title>Experiment Control Panel</title>
-    <link rel="stylesheet" type="text/css" href="css/containerstyle.css">
-    <link rel="stylesheet" type="text/css" href="css/controlpanelstyle.css">
-    <link rel="stylesheet" type="text/css" href="css/consoleboxstyle.css">
+    <title>Parity crusher</title>
+    <link rel="stylesheet" type="text/css" href="css/paritycrusherstyle.css">
     <!--Script references. -->
     <!--Reference the jQuery library. -->
     <script src="Scripts/jquery-2.2.3.min.js"></script>
@@ -19,69 +17,90 @@
 </head>
 
 <body>
-    <div class="controlpanel">
-        <label>Experiment Control</label><br /><br />
-        <input type="button" id="startbutton" value="Start" />
-        <input type="button" id="stopbutton" value="Stop" />
-    </div>
-    <div class="controlpanel">
-        <label>Experiment Parameters</label><br /><br />
-        <form name="ExpParams" id="ExpParams">
-            Auto-trigger:
-            <br>
-            <select name="AutoStart" id="AutoStart">
-                <option>false</option>
-                <option selected>true</option>
+    <header>Parity crusher</header>
+
+    <section class="console">
+        <article>
+            <label>Console</label><br /><br />
+            <textarea id="localconsole" style="width:100%; height:75px; border: 1px solid black" readonly></textarea>
+        </article>
+    </section>
+
+    <section class="controlpanel">
+
+        <article id="startstopcontainer">
+            <label>Experiment Control</label><br />
+            <input type="button" id="startbutton" value="Start" />
+            <input type="button" id="stopbutton" value="Stop" />
+        </article>
+
+        <article id="scanparamscontainer">
+            <label>Scan Parameters</label><br />
+            <form name="scanparamsform" id="scanparamsform">
+                Number of points:
+                <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+                <br>
+                Sample loop rest interval (ms):
+                <input type="text" name="Sleep" id="Sleep" value="5">
+                <br>
+                <label>
+                    <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
+                </label>
+            </form>
+        </article>
+
+        <article id="daqmxparamscontainer">
+            <label>DAQmx Parameters</label><br />
+            <form name="daqmxparamsform" id="daqmxexpparamsform">
+                Auto-trigger:
+                <select name="AutoStart" id="AutoStart">
+                    <option>false</option>
+                    <option selected>true</option>
+                </select>
+            </form>
+        </article>
+
+    </section>
+
+    <section class="datadisplay">
+
+        <article>
+            <article class="plot" id="plot"></article>
+            <input type="button" id="clearbutton" value="Clear" />
+        </article>
+
+        <article>
+            <label>Save/Export</label><br /><br />
+            <input type="button" id="toevernotebutton" value="Backup to Evernote" />
+            <input type="button" id="exportdatabutton" value="Export to" />
+            <select name="exportformatselect" id="exportformatselect">
+                <option selected>JSON</option>
+                <option>Mathematica</option>
+                <option>CSV</option>
+                <option>TSV</option>
             </select>
-            <br> Number of points:
+            <input type="button" id="copydatabutton" value="Copy to clipboard" />
             <br>
-            <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
-            <br> Sample loop rest interval (ms):
-            <br>
-            <input type="text" name="Sleep" id="Sleep" value="5">
-            <br>
-            <label>
-                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
-            </label>
-        </form>
-    </div>
-    <div class="consolebox">
-        <label>Console</label><br /><br />
-        <textarea id="localconsole" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
-    </div>
-    <div class="container">
-        <label>Save/Export</label><br /><br />
-        <input type="button" id="toevernotebutton" value="Backup to Evernote" />
-        <input type="button" id="exportdatabutton" value="Export to" />
-        <select name="exportformatselect" id="exportformatselect">
-            <option selected>JSON</option>
-            <option>Mathematica</option>
-            <option>CSV</option>
-            <option>TSV</option>
-        </select>
-        <input type="button" id="copydatabutton" value="Copy to clipboard" />
-        <br>
-        <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: right-click here & select "Save target as" to download.</a><br />
-        <textarea class="rawData" id="rawData" style="width: 1000px; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
-    </div>
-    <div class="container">
-        <div id="plot" style="left:10%;height:auto;width:80%;"></div>
-        <input type="button" id="clearbutton" value="Clear" />
-    </div>
-   
+            <a id="downloadlink" href="" target="_blank" hidden>Data ready for export: right-click here & select "Save target as" to download.</a><br />
+            <textarea id="rawData" style="width: 90%; height:100px; padding: 2px; border: 1px solid black" readonly></textarea>
+        </article>
+
+    </section>
+
+
+
 
     <script type="text/javascript">
 
         $(function () {
 
             $('#localconsole').val("Hi! Connecting to experiment now. Please wait.");
-
-
             // Declare a proxy to reference the hub.
             var expHub = $.connection.experimentHub;
 
             //Getting plot ready.
             initialisePlot(document.getElementById("plot"), getExperimentParameters());
+
 
             // Create a function that the hub can call to plot the data.
             expHub.client.pushLatestData = function (data) {
@@ -89,7 +108,7 @@
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
                 //Keep data and experimental parameters on screen:
-                
+
                 clearData();
                 var plot = document.getElementById("plot");
                 appendData(plot, jData);
@@ -109,7 +128,7 @@
 
             //This is called by the server once the mma Notebook is ready
             expHub.client.displayDownloadLink = function (link) {
-                $('#downloadlink').attr({href : link, target : '_blank'});
+                $('#downloadlink').attr({ href: link, target: '_blank' });
                 //$('#downloadlink').attr("download", link.split('\\').pop());
                 $('#downloadlink').show();
             };
@@ -163,12 +182,11 @@
             window.getSelection().removeRange(range);
         });
 
-
         //Gets parameters on UI
         var getExperimentParameters = function () {
             //Stuff that doesn't change very often can be hardcoded here.
             var params = {
-                'DAQmx' : {
+                'DAQmx': {
                     'AINames': ['dc', '1f', '2f'],
                     'AIAddresses': ['/dev1/ai1', '/dev1/ai2', '/dev1/ai3'],
                     'AutoStart': document.querySelector('#AutoStart').value,
@@ -182,11 +200,11 @@
                     }
                 },
 
-                'DDS' : {
+                'DDS': {
                     'DDSAddress': 'ASRL3::INSTR'
                 },
 
-                'ScanParams' : {
+                'ScanParams': {
                     'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
                     'Sleep': document.querySelector('#Sleep').value,
                     'ScanParameterName': 'frequency'
@@ -195,6 +213,7 @@
             };
             return params;
         };
+
 
     </script>
 </body>
