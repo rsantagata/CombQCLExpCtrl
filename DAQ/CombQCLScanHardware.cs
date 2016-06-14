@@ -36,12 +36,15 @@ namespace DAQ
             {
                 for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++)
                 {
-                    DataPoint d = new DataPoint(parameters.ScanParams.ScanParameterName, i);
+                    //This part of the experiment doesn't know if we're actually scanning. It simply writes the sequence of values passed over from the UI.
+                    //(Note:index.html is written so that ScanParameterName tells you if you were actually scanning.)
+                    double scanParameterValue = parameters.ScanParams.ScanParameterValues[i];
+                    DataPoint d = new DataPoint(parameters.ScanParams.ScanParameterName, scanParameterValue);
                     //Add VISA command here.
                     //dds.Write("*IDN?\n");
-                    Console.Out.Write(dds.SetFrequency(i * Math.Exp(6)));
+                    dds.SetFrequency(scanParameterValue);
 
-                    //Reading AIs for this position in scan
+                    //Reading AIs for this position in scan. Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
                     d.Add(parameters.DAQmx.AINames, daq.ReadAI());
                     data.Add(d);
 

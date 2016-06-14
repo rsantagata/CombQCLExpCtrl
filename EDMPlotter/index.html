@@ -37,8 +37,23 @@
         <article id="scanparamscontainer">
             <label>Scan Parameters</label><br />
             <form name="scanparamsform" id="scanparamsform">
+                Scan:
+                <select name="ScanBool" id="ScanBool">
+                    <option selected>true</option>
+                    <option>false</option>
+                </select>
+                <br />
                 Number of points:
                 <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+                <br>
+                Start:
+                <input type="text" name="ScanStart" id="ScanStart" value="1">
+                <br>
+                End:
+                <input type="text" name="ScanEnd" id="ScanEnd" value="101">
+                <br>
+                Hold Value (if not scanning):
+                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="2">
                 <br>
                 Sample loop rest interval (ms):
                 <input type="text" name="Sleep" id="Sleep" value="5">
@@ -54,9 +69,27 @@
             <form name="daqmxparamsform" id="daqmxexpparamsform">
                 Auto-trigger:
                 <select name="AutoStart" id="AutoStart">
-                    <option>false</option>
                     <option selected>true</option>
+                    <option>false</option>                    
                 </select>
+            </form>
+        </article>
+
+        <article id="lockincontainer">
+            <label>Lock-in Parameters</label><br />
+            <form name="lockinparamsform" id="lockinparamsform">
+                Demodulate signal:
+                <select name="demodulate" id="Demodulate">
+                    <option>true</option>
+                    <option selected>false</option>
+                </select>
+                <br>
+                Modulation frequency:
+                <input type="text" name="ModulationFrequency" id="ModulationFrequency" value="1000">
+                <br>
+                Max harmonic:
+                <input type="text" name="harmonic" id="Harmonic" value="1">
+                <br>
             </form>
         </article>
 
@@ -194,9 +227,9 @@
                     'SampleRate': 10000,
                     'NumberOfSamplesPerIntegrationTime': 1,
                     'LockinParams': {
-                        'ModulationFrequency': 1000,
-                        'MaxModulationHarmonic': 1,
-                        'MustDemodulate': false
+                        'ModulationFrequency': document.querySelector('#ModulationFrequency').value,
+                        'MaxModulationHarmonic': document.querySelector('#Harmonic').value,
+                        'MustDemodulate': document.querySelector('#Demodulate').value
                     }
                 },
 
@@ -207,10 +240,36 @@
                 'ScanParams': {
                     'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
                     'Sleep': document.querySelector('#Sleep').value,
-                    'ScanParameterName': 'frequency'
+                    'ScanParameterName': 'frequency',
                 }
-
             };
+
+            //Creates the ramp to send to the experiment.
+            var makeScanParameterValues = function () {
+                if (document.querySelector('#ScanBool').value) {    
+                    var start = document.querySelector('#ScanStart').value;
+                    var end = document.querySelector('#ScanEnd').value;
+                    params.ScanParams.ScanParameterValues = function () {
+                        var vals = [], dv = (end - start)/params.ScanParams.NumberOfPoints;
+                        for(var i = 0; i < params.ScanParams.NumberOfPoints; i++)
+                        {
+                            vals.push(i * dv);
+                        }
+                        return vals;
+                    }();
+                }
+                else {
+                    params.ScanParams.ScanParameterValues = function () {
+                        var vals = [];
+                        for (var i = 0; i < params.ScanParams.NumberOfPoints; i++) {
+                            vals.push(document.querySelector('#ScanHoldValue').value);
+                        }
+                        return vals;
+                    }();
+                    params.ScanParams.ScanParameterName = 'index';
+                }
+            };
+            makeScanParameterValues();
             return params;
         };
 
