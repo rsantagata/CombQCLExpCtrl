@@ -70,7 +70,7 @@
                 Auto-trigger:
                 <select name="AutoStart" id="AutoStart">
                     <option selected>true</option>
-                    <option>false</option>                    
+                    <option>false</option>
                 </select>
             </form>
         </article>
@@ -99,7 +99,14 @@
 
         <article>
             <article class="plot" id="plot"></article>
-            <input type="button" id="clearbutton" value="Clear" />
+            <input type="button" id="clearplotbutton" value="Clear" />
+            <label>
+                Plot with x-axis as:<select name="xaxisselect" id="xaxisselect">
+                    <option selected>Scan Parameter</option>
+                    <option>Acquisition Order</option>
+                </select>
+            </label>
+
         </article>
 
         <article>
@@ -131,10 +138,6 @@
             // Declare a proxy to reference the hub.
             var expHub = $.connection.experimentHub;
 
-            //Getting plot ready.
-            initialisePlot(document.getElementById("plot"), getExperimentParameters());
-
-
             // Create a function that the hub can call to plot the data.
             expHub.client.pushLatestData = function (data) {
 
@@ -144,8 +147,8 @@
 
                 clearData();
                 var plot = document.getElementById("plot");
-                appendData(plot, jData);
 
+                plotDataWithRightAxes(plot, jData);
 
             };
 
@@ -170,6 +173,11 @@
             $.connection.hub.start().done(function () {
 
                 $('#startbutton').click(function () {
+
+                    var expParams = getExperimentParameters();
+                    //Getting plot ready.
+                    initialisePlot(document.getElementById("plot"), expParams.ScanParams.ScanParameterName, expParams.DAQmx.AINames);
+
                     // Call the Start method on the hub.
                     expHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
 
@@ -181,7 +189,7 @@
 
                 });
 
-                $('#clearbutton').click(function () {
+                $('#clearplotbutton').click(function () {
                     //Clears data locally in browser
                     clearData();
                 });
@@ -246,14 +254,13 @@
 
             //Creates the ramp to send to the experiment.
             var makeScanParameterValues = function () {
-                if (document.querySelector('#ScanBool').value) {    
-                    var start = document.querySelector('#ScanStart').value;
-                    var end = document.querySelector('#ScanEnd').value;
+                if (document.querySelector('#ScanBool').value == "true") {
+                    var start = parseFloat(document.querySelector('#ScanStart').value);
+                    var end = parseFloat(document.querySelector('#ScanEnd').value);
                     params.ScanParams.ScanParameterValues = function () {
-                        var vals = [], dv = (end - start)/params.ScanParams.NumberOfPoints;
-                        for(var i = 0; i < params.ScanParams.NumberOfPoints; i++)
-                        {
-                            vals.push(i * dv);
+                        var vals = [], dv = (end - start) / parseFloat(params.ScanParams.NumberOfPoints);
+                        for (var i = 0; i < params.ScanParams.NumberOfPoints; i++) {
+                            vals.push(i * dv + start);
                         }
                         return vals;
                     }();
@@ -261,18 +268,32 @@
                 else {
                     params.ScanParams.ScanParameterValues = function () {
                         var vals = [];
-                        for (var i = 0; i < params.ScanParams.NumberOfPoints; i++) {
-                            vals.push(document.querySelector('#ScanHoldValue').value);
+                        for (var i = 0; i < parseFloat(params.ScanParams.NumberOfPoints) ; i++) {
+                            vals.push(parseFloat(document.querySelector('#ScanHoldValue').value));
                         }
                         return vals;
                     }();
-                    params.ScanParams.ScanParameterName = 'index';
-                }
+                    //params.ScanParams.ScanParameterName = 'Acquisition # (Fixed Frequency)';
+                };
             };
             makeScanParameterValues();
             return params;
         };
 
+        var plotDataWithRightAxes = function (plot, jData) {
+            if (document.querySelector('#xaxisselect').value == "Scan Parameter") {
+                updateXAxisLabel(plot, getExperimentParameters().ScanParams.ScanParameterName)
+                appendData(plot, jData);
+            }
+            else if (document.querySelector('#xaxisselect').value == "Acquisition Order") {
+                var axisName = getExperimentParameters().ScanParams.ScanParameterName;
+                for (var i = 0; i < jData.length; i++) {
+                    jData[i][axisName] = i;
+                }
+                updateXAxisLabel(plot, "Acquisition Order (index)")
+                appendData(plot, jData);
+            };
+        };
 
     </script>
 </body>
