@@ -32,12 +32,35 @@ namespace DAQ
 
         public void Disconnect()
         {
-            serial.Dispose();
+            try
+            {
+                serial.Dispose();
+            }
+            catch(Exception e)
+            {
+                Console.Out.WriteLine(e.Message);
+            }
         }
 
 
         public void SetFrequency(double frequency)
         {
+            byte[] command = freqToCommand(frequency);
+            write(command);
+        }
+
+        public void SetFrequency(double frequency, string unit)
+        {
+            switch (unit)
+            {
+                case "K":
+                    frequency = frequency * 1000;
+                    break;
+                case "M":
+                    frequency = frequency * 1000000;
+                    break;
+
+            }
             byte[] command = freqToCommand(frequency);
             write(command);
         }

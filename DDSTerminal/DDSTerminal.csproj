@@ -60,7 +60,6 @@
     <Compile Include="Runner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TCPListenerWrapper.cs" />
-    <Compile Include="USBVisaDDS.cs" />
     <EmbeddedResource Include="ConsoleWindow.resx">
       <DependentUpon>ConsoleWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -84,6 +83,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DAQ\DAQ.csproj">
+      <Project>{a571419e-adf9-47e7-97ef-14cab721de17}</Project>
+      <Name>DAQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -57,10 +57,5 @@ namespace DDSTerminal
         {
             controller.DisconnectDDS();
         }
-
-        private void ConsoleWindow_Shown(object sender, EventArgs e)
-        {
-            controller.ActivateRemoting();
-        }
     }
 }

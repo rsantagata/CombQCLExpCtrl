@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using DAQ;
 
 namespace DDSTerminal
 {
@@ -47,7 +48,7 @@ namespace DDSTerminal
             dds.Connect();
             window.WriteToConsole("Connected.");
 
-
+            ActivateRemoting();
         }
 
         public void DispatchCommandToDDS(string text)

@@ -134,7 +134,6 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "ConsoleWindow";
             this.Text = "DDS Terminal";
-            this.Shown += new System.EventHandler(this.ConsoleWindow_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
