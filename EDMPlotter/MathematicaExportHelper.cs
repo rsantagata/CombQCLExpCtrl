@@ -4,6 +4,7 @@ using Wolfram.NETLink;
 using System.IO;
 using SharedCode;
 using System.Reflection;
+using System.Collections;
 
 namespace EDMPlotter
 {
@@ -42,10 +43,20 @@ namespace EDMPlotter
                 {
                     if (o.GetType().IsArray)
                     {
-                        localParams += paramLabel + "[\"" + i.Name + "\"] = {";
-                        foreach (object obj in (object[])o)
+                        Type t = o.GetType();
+                        object[] objs;
+                        if (t.Equals(typeof(double[]))) //Fixes some odd bug where o appears as double[] instead of object[], which crashes the loop below. Cheezy.
                         {
-                            localParams += toMMAValue(obj) + ",";
+                            objs = Array.ConvertAll<double, object> ((double[])o, obj => (object)obj);
+                        }
+                        else
+                        {
+                            objs = (object[])o;
+                        }
+                        localParams += paramLabel + "[\"" + i.Name + "\"] = {";
+                        foreach (object oo in (object[])objs)
+                        {
+                            localParams += toMMAValue(oo) + ",";
                         }
                         localParams = localParams.Remove(localParams.Length - 1) + "};\n"; //Cheezy way of removing the last comma
                     }
