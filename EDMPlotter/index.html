@@ -53,6 +53,27 @@
 
     <section class="controlpanel">
 
+        <article id="startstopcontainer">
+            <label>Experiment Control</label><br />
+            <input type="button" id="startbutton" value="Start" />
+            <input type="button" id="stopbutton" value="Stop" />
+        </article>
+
+        <article id="numberofpointscontainer">
+            <form name="numberofpointsform" id="numberofpointsform">
+                Number of data points:
+                <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+                <br />
+
+                Sample loop rest interval [ms]:
+                <input type="text" name="Sleep" id="Sleep" value="5">
+                <br />
+
+                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
+            </form>
+        </article>
+
+
         <article id="scanboolcontainer">
 
             <label>Scan Bool</label><br />
@@ -68,41 +89,33 @@
                 <br />
             </form>
         </article>
-        <article id="scanparamscontainer">
-            <form name="scanparamsform" id="scanparamsform">
+
+        <article id="scanrangecontainer">
+            <form name="scanrangeform" id="scanrangeform">
                 <label>Scan Parameters (ignore if Scan Bool = false)</label><br />
                 <br />
                 <label>Start frequency</label>
                 <input type="text" name="ScanStart" id="ScanStart" value="150">
-                <label id="frequnitslabel1">MHz (raw)</label>
+                <label id="frequnitslabel1">MHz to DDS</label>
                 <br />
                 <label>Stop frequency</label>
                 <input type="text" name="ScanEnd" id="ScanEnd" value="250">
-                <label id="frequnitslabel2">MHz (raw)</label>
+                <label id="frequnitslabel2">MHz to DDS</label>
                 <br />
 
                 External factor 'm':
                 <input type="text" name="ExternalFactor" id="ExternalFactor" value="64">
-                <input type="button" id="converttoddsunitsbutton" value="Convert" />
+                <input type="button" id="converttoddsunitsbutton" value="Convert to DDS units" />
                 <br />
 
                 <br />
-                <label> Warning: allowed values (for YIG):  </label><br />
-                <label> 125 MHz < <space>f<sub>DDS</sub></space> < 275 MHz  </label><br />
-                <label> 8 GHz < <space>m x f<sub>DDS</sub></space> < 17,6 GHz  </label><br />
+                <label> Warning: allowed values are  </label><br />
+                <label> f<sub>min</sub> = 125 MHz <space> < <space> f<sub>DDS</sub></space> < <space>f<sub>max</sub> = 275 MHz </label><br />
+                <label> 64 x f<sub>min</sub> = 8 GHz <space> < <space> 64 x f<sub>DDS</sub> </space> < <space>64 x f<sub>max</sub> = 17.6 GHz</label><br />
                 <br />
-
-                Number of data points:
-                <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
-                <br />
-
-                Sample loop rest interval [ms]:
-                <input type="text" name="Sleep" id="Sleep" value="5">
-                <br />
-
-                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
             </form>
         </article>
+
 
         <article id="daqmxparamscontainer">
             <label>DAQmx Parameters</label><br />
@@ -113,12 +126,6 @@
                     <option>false</option>
                 </select>
             </form>
-        </article>
-
-        <article id="startstopcontainer">
-            <label>Experiment Control</label><br />
-            <input type="button" id="startbutton" value="Start" />
-            <input type="button" id="stopbutton" value="Stop" />
         </article>
 
     </section>
