@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 
 <head>
-    <title>Parity crusher</title>
+    <title>DDS INTERFACE</title>
     <link rel="stylesheet" type="text/css" href="css/paritycrusherstyle.css">
     <!--Script references. -->
     <!--Reference the jQuery library. -->
@@ -14,10 +14,35 @@
     <!--Add script to plot some data.-->
     <script src="https://cdn.plot.ly/plotly-latest.js"></script>
     <script src="js/plotlyplot2.js" type="text/javascript"></script>
+    <style type="text/css">
+        .auto-style1 {
+            font-size: small;
+        }
+
+        #ScanStart {
+            width: 80px;
+        }
+
+        #ScanEnd {
+            width: 80px;
+        }
+
+        #ScanHoldValue {
+            width: 80px;
+        }
+
+        #NumberOfPoints {
+            width: 80px;
+        }
+
+        #Sleep {
+            width: 80px;
+        }
+    </style>
 </head>
 
 <body>
-    <header>Parity crusher</header>
+    <header>DDS INTERFACE</header>
 
     <section class="console">
         <article>
@@ -35,32 +60,55 @@
         </article>
 
         <article id="scanparamscontainer">
+
             <label>Scan Parameters</label><br />
             <form name="scanparamsform" id="scanparamsform">
+
+                </label>
                 Scan:
                 <select name="ScanBool" id="ScanBool">
                     <option selected>true</option>
                     <option>false</option>
                 </select>
                 <br />
-                Number of points:
+
+                External factor 'm':
+                <input type="text" name="ExternalFactor" id="ExternalFactor" value="64">
+                <input type="button" id="converttoddsunitsbutton" value="Convert" />
+                <br>
+
+                <br>
+                <label>INPUT FREQUENCIES</label><br />
+                <label><span class="auto-style1"> !!! allowed values!!! </span> </label><br />
+                <label><span class="auto-style1"> 125 MHz < <space>f<sub>DDS</sub></space> < 275 MHz </span> </label><br />
+                <label><span class="auto-style1"> 8 GHz < <space>m x f<sub>DDS</sub></space> < 17,6 GHz </span> </label><br />
+
+                <br>
+                Start frequency [MHz]:
+                <input type="text" name="ScanStart" id="ScanStart" value="150">
+
+                <br>
+                Stop frequency [MHz]:
+                <input type="text" name="ScanEnd" id="ScanEnd" value="250">
+
+                <br>
+                Fixed frequency [MHz]:
+                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="200">
+                <br />
+
+                <br>
+                Number of data points:
                 <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+
                 <br>
-                Start:
-                <input type="text" name="ScanStart" id="ScanStart" value="1">
-                <br>
-                End:
-                <input type="text" name="ScanEnd" id="ScanEnd" value="101">
-                <br>
-                Hold Value (if not scanning):
-                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="2">
-                <br>
-                Sample loop rest interval (ms):
+                Sample loop rest interval [ms]:
                 <input type="text" name="Sleep" id="Sleep" value="5">
+
+
+
                 <br>
                 <label>
                     <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
-                </label>
             </form>
         </article>
 
@@ -102,8 +150,9 @@
             <input type="button" id="clearplotbutton" value="Clear" />
             <label>
                 Plot with x-axis as:<select name="xaxisselect" id="xaxisselect">
-                    <option selected>Scan Parameter</option>
+                    <option selected>DDS Frequency</option>
                     <option>Acquisition Order</option>
+                    <option>Frequency * External Factor</option>
                 </select>
             </label>
 
@@ -114,10 +163,10 @@
             <input type="button" id="toevernotebutton" value="Backup to Evernote" />
             <input type="button" id="exportdatabutton" value="Export to" />
             <select name="exportformatselect" id="exportformatselect">
-                <option selected>JSON</option>
-                <option>Mathematica</option>
+                <option selected>TSV</option>
                 <option>CSV</option>
-                <option>TSV</option>
+                <option>Mathematica</option>
+                <option>JSON</option>
             </select>
             <input type="button" id="copydatabutton" value="Copy to clipboard" />
             <br>
@@ -189,6 +238,12 @@
 
                 });
 
+                $('#converttoddsunitsbutton').click(function () {
+                     document.querySelector('#ScanStart').value =  document.querySelector('#ScanStart').value /  document.querySelector('#ExternalFactor').value;
+                     document.querySelector('#ScanEnd').value = document.querySelector('#ScanEnd').value / document.querySelector('#ExternalFactor').value;
+
+                });
+
                 $('#clearplotbutton').click(function () {
                     //Clears data locally in browser
                     clearData();
@@ -242,59 +297,100 @@
                 },
 
                 'DDS': {
-                    //'DDSAddress': 'ASRL3::INSTR'
                     'DDSAddress': 'ASRL4::INSTR'
+                    //'DDSAddress': 'ASRL3:INSTR'
                 },
 
                 'ScanParams': {
+                    'ScanStart': document.querySelector('#ScanStart').value,
+                    'ScanEnd': document.querySelector('#ScanEnd').value,
                     'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
+                    'HoldValue': document.querySelector('#ScanHoldValue').value,
                     'Sleep': document.querySelector('#Sleep').value,
-                    'ScanParameterName': 'frequency',
+                    'ScanParameterName': 'Frequency [Hz]',
+                },
+                // Put all misc. parameters / comments / experimental conditions in here
+                'ExternalParams': {
+                    'Comments': "Empty comment",
+                    'ExternalFactor' : document.querySelector('#ExternalFactor').value
                 }
+
             };
+
 
             //Creates the ramp to send to the experiment.
-            var makeScanParameterValues = function () {
-                if (document.querySelector('#ScanBool').value == "true") {
-                    var start = parseFloat(document.querySelector('#ScanStart').value);
-                    var end = parseFloat(document.querySelector('#ScanEnd').value);
-                    params.ScanParams.ScanParameterValues = function () {
-                        var vals = [], dv = (end - start) / parseFloat(params.ScanParams.NumberOfPoints);
-                        for (var i = 0; i < params.ScanParams.NumberOfPoints; i++) {
-                            vals.push(i * dv + start);
-                        }
-                        return vals;
-                    }();
-                }
-                else {
-                    params.ScanParams.ScanParameterValues = function () {
-                        var vals = [];
-                        for (var i = 0; i < parseFloat(params.ScanParams.NumberOfPoints) ; i++) {
-                            vals.push(parseFloat(document.querySelector('#ScanHoldValue').value));
-                        }
-                        return vals;
-                    }();
-                    //params.ScanParams.ScanParameterName = 'Acquisition # (Fixed Frequency)';
-                };
-            };
-            makeScanParameterValues();
-            return params;
-        };
 
-        var plotDataWithRightAxes = function (plot, jData) {
-            if (document.querySelector('#xaxisselect').value == "Scan Parameter") {
-                updateXAxisLabel(plot, getExperimentParameters().ScanParams.ScanParameterName)
-                appendData(plot, jData);
-            }
-            else if (document.querySelector('#xaxisselect').value == "Acquisition Order") {
-                var axisName = getExperimentParameters().ScanParams.ScanParameterName;
-                for (var i = 0; i < jData.length; i++) {
-                    jData[i][axisName] = i;
-                }
-                updateXAxisLabel(plot, "Acquisition Order (index)")
-                appendData(plot, jData);
+            var makeScanParameterValues = function () {
+                    //Creates the variables.
+                var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
+                var start = parseFloat(params.ScanParams.ScanStart);
+                var end = parseFloat(params.ScanParams.ScanEnd);
+                var hold = parseFloat(params.ScanParams.HoldValue);
+                var points = parseFloat(params.ScanParams.NumberOfPoints);
+
+                    //DDS SCAN
+                    if (document.querySelector('#ScanBool').value == "true") {
+                        if ((start > 125 ) && (end < 275 )) {
+                            params.ScanParams.ScanParameterValues = function () {
+                                var vals = [], dv = (end - start) / points;
+                                for (var i = 0; i < points/2; i++) {
+                                    vals.push((2*i * dv + start)*1000000);
+                                }
+                                for (var i = 0; i < points/2; i++) {
+                                    vals.push((end - 2*i * dv)*1000000);
+                                }
+                                return vals;
+                            }();
+                        }
+					}
+
+                    //DDS HOLD
+                    else if (document.querySelector('#ScanBool').value == "false") {
+                        if ((hold > 125 ) && (hold < 275 )) {
+                            params.ScanParams.ScanParameterValues = function () {
+                                var vals = [];
+                                    for (var i = 0; i < points ; i++) {
+                                        vals.push(hold * 1000000);
+                                    }
+                                    return vals;
+                            }();
+                        }
+                    };
+                    //params.ScanParams.ScanParameterName = 'Acquisition # (Fixed Frequency)';
+
+                };
+                makeScanParameterValues();
+                return params;
             };
-        };
+
+
+            //Creates the plot.
+            var plotDataWithRightAxes = function (plot, jData) {
+                    var params = getExperimentParameters();
+                    if (document.querySelector('#xaxisselect').value == "DDS Frequency") {
+                        updateXAxisLabel(plot, params.ScanParams.ScanParameterName)
+                        appendData(plot, jData);
+                    }
+
+                    if (document.querySelector('#xaxisselect').value == "Frequency * External Factor") {
+                        var axisName = params.ScanParams.ScanParameterName;
+                        for (var i = 0; i <jData.length; i++) {
+                            jData[i][axisName] = i*((parseFloat(params.ExternalParams.ExternalFactor)/1000)*((parseFloat(params.ScanParams.ScanEnd)- parseFloat(params.ScanParams.ScanStart)))
+                                                    /parseFloat(params.ScanParams.NumberOfPoints))+(parseFloat(params.ExternalParams.ExternalFactor)*(parseFloat(params.ScanParams.ScanStart)/1000));
+                        }
+                        updateXAxisLabel(plot, "Frequency * External Factor [GHz]")
+                        appendData(plot, jData);
+                    }
+
+                    else if (document.querySelector('#xaxisselect').value == "Acquisition Order") {
+                        var axisName = getExperimentParameters().ScanParams.ScanParameterName;
+                        for (var i = 0; i < jData.length; i++) {
+                            jData[i][axisName] = i;
+                        }
+                        updateXAxisLabel(plot, "Acquisition Order")
+                        appendData(plot, jData);
+                    };
+            };
 
     </script>
 </body>
