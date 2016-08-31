@@ -22,7 +22,6 @@ namespace EDMPlotter
         ExperimentParameters parameters;
         enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
         ExperimentState es;
-        EvernoteDispatcher ed;
 
         object keepRunningCheckLock = new object();
 
@@ -35,7 +34,6 @@ namespace EDMPlotter
             Clients = clients;
             exp = new CombQCLScanHardware();
             //hardware = new FakeHardware();
-            ed = new EvernoteDispatcher(this);
 
             es = ExperimentState.IsStopped;
             Clients.All.toConsole("Experiment is ready.");
@@ -69,7 +67,7 @@ namespace EDMPlotter
                     initialiseExperimentalParameters(jsonParams);
                     IsParamsReadable = true;
                 }
-                catch(ExperimentalParametersException e)
+                catch(ExperimentalParametersException) //Catch weird parameters from UI that would crash the experiment
                 {
                     ToConsole("Could not interpret experiment parameters. Please check and try again.");
                     IsParamsReadable = false;
@@ -137,10 +135,6 @@ namespace EDMPlotter
                 ToConsole("Cannot save data. Experiment is still running.");
             }
 
-        }
-        public void StoreAsEvernote()
-        {
-            ed.SendToEvernote(dataArchive.ToArray());
         }
 
         public void ToConsole(string s)
@@ -260,22 +254,7 @@ namespace EDMPlotter
             }
 
         }
-        /*
-        public void Save(string path)
-        {
-            //CsvExport csv = new CsvExport();
-            //TsvExport csv = new TsvExport();
-            JSONExport csv = new JSONExport();
-             for (int i = 0; i < Length; i++)
-             {
-                 csv.AddRow();
-                 foreach(KeyValuePair<string, double> p in Points[i].kvPairs)
-                 {
-                     csv[p.Key] = p.Value;
-                 }
-             }
-            csv.ExportToFile(@"" + path, );
-        }*/
+
     }
     #endregion
 

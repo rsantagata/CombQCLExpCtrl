@@ -14,6 +14,5 @@ namespace SharedCode
         public string TriggerAddress { get; set; }
         public int SampleRate { get; set; }
         public int NumberOfSamplesPerIntegrationTime { get; set; }
-        public LockinAmplifierParameters LockinParams { get; set; }
     }
 }

@@ -22,8 +22,11 @@ namespace DAQ
         {
             parameters = p;
 
-            daq = new DAQmxTriggeredMultiAIHardware();
-            daq.ConfigureAI(parameters.DAQmx);
+            if (p.ScanParams.AcquireDataDuringScan)
+            {
+                daq = new DAQmxTriggeredMultiAIHardware();
+                daq.ConfigureAI(parameters.DAQmx);
+            }
             
             dds = new USBVisaDDS(parameters.DDS.DDSAddress);
             dds.Connect();
@@ -40,14 +43,18 @@ namespace DAQ
                     //(Note:index.html is written so that ScanParameterName tells you if you were actually scanning.)
                     double scanParameterValue = parameters.ScanParams.ScanParameterValues[i];
                     DataPoint d = new DataPoint(parameters.ScanParams.ScanParameterName, scanParameterValue);
-                    //Add VISA command here.
-                    //dds.Write("*IDN?\n");
+                    
+                    //This is where the parameter is sent to DDS.
                     dds.SetFrequency(scanParameterValue);
 
-                    //Reading AIs for this position in scan. Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
-                    d.Add(parameters.DAQmx.AINames, daq.ReadAI());
-                    data.Add(d);
-
+                    if (parameters.ScanParams.AcquireDataDuringScan)
+                    {
+                        //Reading AIs for this position in scan. 
+                        //Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
+                        //Any averaging has to happen before getting added to d.
+                        d.Add(parameters.DAQmx.AINames, daq.ReadAI());
+                        data.Add(d);
+                    }
                     //Interval between measurements
                     Thread.Sleep(parameters.ScanParams.Sleep);
                 }

@@ -7,6 +7,6 @@ namespace SharedCode
         public ScanParameters ScanParams { get; set; }
         public DDSParameters DDS { get; set; }
         public DAQmxParameters DAQmx { get; set; }
-
+        public ExternalParameters ExternalParams { get; set; }
     }
 }

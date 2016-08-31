@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="DAQmxParameters.cs" />
     <Compile Include="DDSParameters.cs" />
+    <Compile Include="ExternalParameters.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="LockinAmplifierParameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

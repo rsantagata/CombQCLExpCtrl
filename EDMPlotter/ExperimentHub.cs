@@ -33,11 +33,6 @@ namespace EDMPlotter
             ExperimentControl.Instance.Save(format);
         }
 
-        public void BackupExperimentData()
-        {
-            ExperimentControl.Instance.StoreAsEvernote();
-        }
-
     }
 
 
