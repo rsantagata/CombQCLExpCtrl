@@ -11,7 +11,6 @@ namespace DAQ
         private Task readAIsTask;
         DataSet data;
         DAQmxParameters parameters;
-        LockinAmplifierParameters lockinParams;
 
         #region public region
         
@@ -35,29 +34,13 @@ namespace DAQ
             }
             double[] result = new double[parameters.AIAddresses.Length];
 
-            if (lockinParams.MustDemodulate)
+            for (int i = 0; i < result.Length; i++)
             {
-                for (int i = 0; i < result.Length; i++)
+                for (int j = 0; j < parameters.NumberOfSamplesPerIntegrationTime; j++)
                 {
-                    double[] temp = new double[parameters.NumberOfSamplesPerIntegrationTime];
-                    for(int j = 0; j < parameters.NumberOfSamplesPerIntegrationTime; j++)
-                    {
-                        temp[j] = data[i, j];
-                    }
-                    result[i] = NumLockIn.GetAmplitude(temp, lockinParams.ModulationFrequency, lockinParams.MaxModulationHarmonic, 
-                        parameters.NumberOfSamplesPerIntegrationTime, parameters.SampleRate);
+                    result[i] += data[i, j];
                 }
-            }
-            else
-            {
-                for (int i = 0; i < result.Length; i++)
-                {
-                    for (int j = 0; j < parameters.NumberOfSamplesPerIntegrationTime; j++)
-                    {
-                        result[i] += data[i, j];
-                    }
-                    result[i] = result[i] / parameters.NumberOfSamplesPerIntegrationTime;
-                }
+                result[i] = result[i] / parameters.NumberOfSamplesPerIntegrationTime;
             }
             return result;
         }
@@ -65,7 +48,6 @@ namespace DAQ
         public void ConfigureAI(DAQmxParameters p)
         {
             parameters = p;
-            lockinParams = p.LockinParams;
             data = new DataSet();
             readAIsTask = new Task("readAI");
 

@@ -13,7 +13,7 @@
     <script src="signalr/hubs"></script>
     <!--Add script to plot some data.-->
     <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-    <script src="js/plotlyplot2.js" type="text/javascript"></script>
+    <script src="js/plotlyplot.js" type="text/javascript"></script>
     <style type="text/css">
         .auto-style1 {
             font-size: small;
@@ -53,62 +53,54 @@
 
     <section class="controlpanel">
 
-        <article id="startstopcontainer">
-            <label>Experiment Control</label><br />
-            <input type="button" id="startbutton" value="Start" />
-            <input type="button" id="stopbutton" value="Stop" />
-        </article>
+        <article id="scanboolcontainer">
 
-        <article id="scanparamscontainer">
-
-            <label>Scan Parameters</label><br />
-            <form name="scanparamsform" id="scanparamsform">
-
-                </label>
+            <label>Scan Bool</label><br />
+            <form name="scanboolform" id="scanparamsform">
                 Scan:
                 <select name="ScanBool" id="ScanBool">
                     <option selected>true</option>
                     <option>false</option>
                 </select>
+                (hold at:
+                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="200">
+                MHz if false)
+                <br />
+            </form>
+        </article>
+        <article id="scanparamscontainer">
+            <form name="scanparamsform" id="scanparamsform">
+                <label>Scan Parameters (ignore if Scan Bool = false)</label><br />
+                <br />
+                <label>Start frequency</label>
+                <input type="text" name="ScanStart" id="ScanStart" value="150">
+                <label id="frequnitslabel1">MHz (raw)</label>
+                <br />
+                <label>Stop frequency</label>
+                <input type="text" name="ScanEnd" id="ScanEnd" value="250">
+                <label id="frequnitslabel2">MHz (raw)</label>
                 <br />
 
                 External factor 'm':
                 <input type="text" name="ExternalFactor" id="ExternalFactor" value="64">
                 <input type="button" id="converttoddsunitsbutton" value="Convert" />
-                <br>
-
-                <br>
-                <label>INPUT FREQUENCIES</label><br />
-                <label><span class="auto-style1"> !!! allowed values!!! </span> </label><br />
-                <label><span class="auto-style1"> 125 MHz < <space>f<sub>DDS</sub></space> < 275 MHz </span> </label><br />
-                <label><span class="auto-style1"> 8 GHz < <space>m x f<sub>DDS</sub></space> < 17,6 GHz </span> </label><br />
-
-                <br>
-                Start frequency [MHz]:
-                <input type="text" name="ScanStart" id="ScanStart" value="150">
-
-                <br>
-                Stop frequency [MHz]:
-                <input type="text" name="ScanEnd" id="ScanEnd" value="250">
-
-                <br>
-                Fixed frequency [MHz]:
-                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="200">
                 <br />
 
-                <br>
+                <br />
+                <label> Warning: allowed values (for YIG):  </label><br />
+                <label> 125 MHz < <space>f<sub>DDS</sub></space> < 275 MHz  </label><br />
+                <label> 8 GHz < <space>m x f<sub>DDS</sub></space> < 17,6 GHz  </label><br />
+                <br />
+
                 Number of data points:
                 <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+                <br />
 
-                <br>
                 Sample loop rest interval [ms]:
                 <input type="text" name="Sleep" id="Sleep" value="5">
+                <br />
 
-
-
-                <br>
-                <label>
-                    <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
+                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
             </form>
         </article>
 
@@ -123,22 +115,10 @@
             </form>
         </article>
 
-        <article id="lockincontainer">
-            <label>Lock-in Parameters</label><br />
-            <form name="lockinparamsform" id="lockinparamsform">
-                Demodulate signal:
-                <select name="demodulate" id="Demodulate">
-                    <option>true</option>
-                    <option selected>false</option>
-                </select>
-                <br>
-                Modulation frequency:
-                <input type="text" name="ModulationFrequency" id="ModulationFrequency" value="1000">
-                <br>
-                Max harmonic:
-                <input type="text" name="harmonic" id="Harmonic" value="1">
-                <br>
-            </form>
+        <article id="startstopcontainer">
+            <label>Experiment Control</label><br />
+            <input type="button" id="startbutton" value="Start" />
+            <input type="button" id="stopbutton" value="Stop" />
         </article>
 
     </section>
@@ -160,7 +140,6 @@
 
         <article>
             <label>Save/Export</label><br /><br />
-            <input type="button" id="toevernotebutton" value="Backup to Evernote" />
             <input type="button" id="exportdatabutton" value="Export to" />
             <select name="exportformatselect" id="exportformatselect">
                 <option selected>TSV</option>
@@ -239,9 +218,10 @@
                 });
 
                 $('#converttoddsunitsbutton').click(function () {
-                     document.querySelector('#ScanStart').value =  document.querySelector('#ScanStart').value /  document.querySelector('#ExternalFactor').value;
-                     document.querySelector('#ScanEnd').value = document.querySelector('#ScanEnd').value / document.querySelector('#ExternalFactor').value;
-
+                    document.querySelector('#ScanStart').value = document.querySelector('#ScanStart').value / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#ScanEnd').value = document.querySelector('#ScanEnd').value / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#frequnitslabel1').textContent = "MHz (converted)";
+                    document.querySelector('#frequnitslabel2').textContent = "MHz (converted)";
                 });
 
                 $('#clearplotbutton').click(function () {
@@ -251,10 +231,6 @@
 
                 $('#exportdatabutton').click(function () {
                     expHub.server.saveExperiment($('#exportformatselect').val());
-                });
-
-                $('#toevernotebutton').click(function () {
-                    expHub.server.backupExperimentData();
                 });
 
             });
@@ -288,17 +264,12 @@
                     'AutoStart': document.querySelector('#AutoStart').value,
                     'TriggerAddress': '/dev1/PFI0',
                     'SampleRate': 10000,
-                    'NumberOfSamplesPerIntegrationTime': 1,
-                    'LockinParams': {
-                        'ModulationFrequency': document.querySelector('#ModulationFrequency').value,
-                        'MaxModulationHarmonic': document.querySelector('#Harmonic').value,
-                        'MustDemodulate': document.querySelector('#Demodulate').value
-                    }
+                    'NumberOfSamplesPerIntegrationTime': 1
                 },
 
                 'DDS': {
-                    'DDSAddress': 'ASRL4::INSTR'
-                    //'DDSAddress': 'ASRL3:INSTR'
+                    //'DDSAddress': 'ASRL4::INSTR'
+                    'DDSAddress': 'ASRL3::INSTR'
                 },
 
                 'ScanParams': {
@@ -312,7 +283,7 @@
                 // Put all misc. parameters / comments / experimental conditions in here
                 'ExternalParams': {
                     'Comments': "Empty comment",
-                    'ExternalFactor' : document.querySelector('#ExternalFactor').value
+                    'ExternalFactor': document.querySelector('#ExternalFactor').value
                 }
 
             };
@@ -321,76 +292,47 @@
             //Creates the ramp to send to the experiment.
 
             var makeScanParameterValues = function () {
-                    //Creates the variables.
+                //Redundant, but makes the code below easier to read.
                 var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
                 var start = parseFloat(params.ScanParams.ScanStart);
                 var end = parseFloat(params.ScanParams.ScanEnd);
                 var hold = parseFloat(params.ScanParams.HoldValue);
                 var points = parseFloat(params.ScanParams.NumberOfPoints);
 
-                    //DDS SCAN
-                    if (document.querySelector('#ScanBool').value == "true") {
-                        if ((start > 125 ) && (end < 275 )) {
-                            params.ScanParams.ScanParameterValues = function () {
-                                var vals = [], dv = (end - start) / points;
-                                for (var i = 0; i < points/2; i++) {
-                                    vals.push((2*i * dv + start)*1000000);
-                                }
-                                for (var i = 0; i < points/2; i++) {
-                                    vals.push((end - 2*i * dv)*1000000);
-                                }
-                                return vals;
-                            }();
-                        }
-					}
+                //DDS SCAN
+                if (document.querySelector('#ScanBool').value == "true") {
+                    if ((start > 125) && (end < 275)) {
+                        params.ScanParams.ScanParameterValues = function () {
+                            var vals = [], dv = (end - start) / points;
+                            for (var i = 0; i < points / 2; i++) {
+                                vals.push((2 * i * dv + start) * 1000000);
+                            }
+                            for (var i = 0; i < points / 2; i++) {
+                                vals.push((end - 2 * i * dv) * 1000000);
+                            }
+                            return vals;
+                        }();
+                    }
+                }
 
                     //DDS HOLD
-                    else if (document.querySelector('#ScanBool').value == "false") {
-                        if ((hold > 125 ) && (hold < 275 )) {
-                            params.ScanParams.ScanParameterValues = function () {
-                                var vals = [];
-                                    for (var i = 0; i < points ; i++) {
-                                        vals.push(hold * 1000000);
-                                    }
-                                    return vals;
-                            }();
-                        }
-                    };
-                    //params.ScanParams.ScanParameterName = 'Acquisition # (Fixed Frequency)';
-
+                else if (document.querySelector('#ScanBool').value == "false") {
+                    if ((hold > 125) && (hold < 275)) {
+                        params.ScanParams.ScanParameterValues = function () {
+                            var vals = [];
+                            for (var i = 0; i < points ; i++) {
+                                vals.push(hold * 1000000);
+                            }
+                            return vals;
+                        }();
+                    }
                 };
-                makeScanParameterValues();
-                return params;
+
             };
+            makeScanParameterValues();
+            return params;
+        };
 
-
-            //Creates the plot.
-            var plotDataWithRightAxes = function (plot, jData) {
-                    var params = getExperimentParameters();
-                    if (document.querySelector('#xaxisselect').value == "DDS Frequency") {
-                        updateXAxisLabel(plot, params.ScanParams.ScanParameterName)
-                        appendData(plot, jData);
-                    }
-
-                    if (document.querySelector('#xaxisselect').value == "Frequency * External Factor") {
-                        var axisName = params.ScanParams.ScanParameterName;
-                        for (var i = 0; i <jData.length; i++) {
-                            jData[i][axisName] = i*((parseFloat(params.ExternalParams.ExternalFactor)/1000)*((parseFloat(params.ScanParams.ScanEnd)- parseFloat(params.ScanParams.ScanStart)))
-                                                    /parseFloat(params.ScanParams.NumberOfPoints))+(parseFloat(params.ExternalParams.ExternalFactor)*(parseFloat(params.ScanParams.ScanStart)/1000));
-                        }
-                        updateXAxisLabel(plot, "Frequency * External Factor [GHz]")
-                        appendData(plot, jData);
-                    }
-
-                    else if (document.querySelector('#xaxisselect').value == "Acquisition Order") {
-                        var axisName = getExperimentParameters().ScanParams.ScanParameterName;
-                        for (var i = 0; i < jData.length; i++) {
-                            jData[i][axisName] = i;
-                        }
-                        updateXAxisLabel(plot, "Acquisition Order")
-                        appendData(plot, jData);
-                    };
-            };
 
     </script>
 </body>

@@ -1,4 +1,3 @@
-
 header {
     text-align: center;
     width: 100%;
@@ -23,25 +22,24 @@ article {
     padding-right: 2.5%;
     padding-top: 1%;
     padding-bottom: 1%;
-    margin-top:0.5%;
+    margin-top: 0.5%;
 }
 
-.console{
+.console {
     width: 97.3%;
-
 }
 
-.controlpanel{
+.controlpanel {
     width: 30%;
     float: left;
 }
 
-.datadisplay{
+.datadisplay {
     width: 64.5%;
     float: right;
 }
 
-.plot{
+.plot {
     background-color: #ffffff;
     float: left;
     border: solid #808080;
@@ -49,7 +47,7 @@ article {
     min-height: 400px;
 }
 
-.rawData{
+.rawData {
     background-color: #ffffff;
     float: left;
     border: solid #808080;
