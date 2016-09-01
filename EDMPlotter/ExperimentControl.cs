@@ -159,8 +159,12 @@ namespace EDMPlotter
                 Clients.All.pushLatestData(currentDataSet.ToJson());
                 dataArchive.Add(currentDataSet);
                 numberOfScans++;
+                if(parameters.ScanParams.StopOnEOS)
+                {
+                    es = ExperimentState.IsFinishing;
+                }
             }
-            ToConsole("Acquisition complete.");
+            ToConsole("Acquisition/Move complete.");
             ToConsole("Disposing hardware classes...");
             exp.Dispose();
             ToConsole("Disposed.");

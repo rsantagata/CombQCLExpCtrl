@@ -16,5 +16,6 @@ namespace SharedCode
         public string ScanParameterName { get; set; }
         public double[] ScanParameterValues { get; set; }
         public bool AcquireDataDuringScan { get; set; }
+        public bool StopOnEOS { get; set; }
     }
 }

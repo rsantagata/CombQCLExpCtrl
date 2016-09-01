@@ -52,9 +52,19 @@
     </section>
 
     <section class="controlpanel">
+        <label>Single Output Control</label><br />
+
+        <article id="movecontainer">
+            current DDS Frequency: 
+            <input type="text" name="MoveFrom" id="MoveFrom" value="150"> MHz <br /> 
+            target DDS Frequency:
+            <input type="text" name="MoveTo" id="MoveTo" value="250"> MHz <br /> 
+            <input type="button" id="gobutton" value="Go" />
+        </article><br />
+
+        <label>Scan Control</label><br />
 
         <article id="startstopcontainer">
-            <label>Experiment Control</label><br />
             <input type="button" id="startbutton" value="Start" />
             <input type="button" id="stopbutton" value="Stop" />
         </article>
@@ -221,7 +231,6 @@
                 $('#stopbutton').click(function () {
                     // Call the Stop method on the hub.
                     expHub.server.stopExperiment();
-
                 });
 
                 $('#converttoddsunitsbutton').click(function () {
@@ -238,6 +247,28 @@
 
                 $('#exportdatabutton').click(function () {
                     expHub.server.saveExperiment($('#exportformatselect').val());
+                });
+
+                //A slightly cheezy way of gently moving the DDS frequency to avoid unlocking.
+                //Makes a single mock scan that doesn't acquire any data. 
+                //Make sure the number of points corresponds to a 'safe' frequency interval.
+                //ATM, there is no verification process and the DDS never returns.
+                //Also, the start of the 'move' is unknown (to program), so it needs to be (initially) put in by hand.
+                //To improve on this, make communication to DDS two way so we can to query the 'start' frequency.
+                $('#gobutton').click(function () {
+                    var expParams = getExperimentParameters();
+                    expParams.ScanParams.AcquireDataDuringScan = false;
+                    expParams.ScanParams.StopOnEOS = true;
+                    expParams.ScanParams.ScanStart = parseFloat(document.querySelector('#MoveFrom').value);
+                    expParams.ScanParams.ScanEnd = parseFloat(document.querySelector('#MoveTo').value);
+                    expParams.ScanParams.NumberOfPoints = Math.abs(Math.round(1 / 2 * (expParams.ScanParams.ScanEnd - expParams.ScanParams.ScanStart))); //delta F of 2MHz
+                    // Call the Start method on the hub.
+                    expHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
+
+                    // So UI remembers end point of previous move.
+                    document.querySelector('#MoveFrom').value = expParams.ScanParams.ScanEnd; 
+
+
                 });
 
             });
@@ -286,7 +317,8 @@
                     'HoldValue': document.querySelector('#ScanHoldValue').value,
                     'Sleep': document.querySelector('#Sleep').value,
                     'ScanParameterName': 'Frequency [Hz]',
-                    'AcquireDataDuringScan': true
+                    'AcquireDataDuringScan': true,
+                    'StopOnEOS': document.querySelector('#eosstopcheckbox').checked ? true : false
                 },
                 // Put all misc. parameters / comments / experimental conditions in here
                 'ExternalParams': {
