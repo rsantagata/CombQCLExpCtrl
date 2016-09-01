@@ -156,15 +156,17 @@ namespace EDMPlotter
                 currentDataSet = new DataSet();
                 for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++)
                 {
-
-                    currentPoint = exp.Acquire(parameters.ScanParams.ScanParameterValues[i]);
-                    currentDataSet.Add(currentPoint);
-                    if(es.Equals(ExperimentState.IsFinishing))
+                    if(es.Equals(ExperimentState.IsRunning))
+                    {
+                        currentPoint = exp.Acquire(parameters.ScanParams.ScanParameterValues[i]);
+                        currentDataSet.Add(currentPoint);
+                        //Interval between measurements
+                        Thread.Sleep(parameters.ScanParams.Sleep);
+                    }
+                    else
                     {
                         break;
-                    }
-                    //Interval between measurements
-                    Thread.Sleep(parameters.ScanParams.Sleep);
+                    }               
                 }
                 //Push data down to the client like this.
                 Clients.All.pushLatestData(currentDataSet.ToJson());
