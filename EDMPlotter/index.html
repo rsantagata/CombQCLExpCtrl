@@ -55,10 +55,10 @@
         <label>Single Output Control</label><br />
 
         <article id="movecontainer">
-            current DDS Frequency: 
-            <input type="text" name="MoveFrom" id="MoveFrom" value="150"> MHz <br /> 
+            current DDS Frequency:
+            <input type="text" name="MoveFrom" id="MoveFrom" value="150"> MHz <br />
             target DDS Frequency:
-            <input type="text" name="MoveTo" id="MoveTo" value="250"> MHz <br /> 
+            <input type="text" name="MoveTo" id="MoveTo" value="250"> MHz <br />
             <input type="button" id="gobutton" value="Go" />
         </article><br />
 
@@ -87,15 +87,17 @@
         <article id="scanboolcontainer">
 
             <label>Scan Bool</label><br />
-            <form name="scanboolform" id="scanparamsform">
+            <form name="scantypeform" id="scantypeform">
                 Scan:
-                <select name="ScanBool" id="ScanBool">
-                    <option selected>true</option>
-                    <option>false</option>
+                <select name="ScanType" id="ScanType">
+                    <option selected>UpDown</option>
+                    <option>Up</option>
+                    <option>Down</option>
+                    <option>Hold</option>
                 </select>
-                (hold at:
+                (If hold, hold at:
                 <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="200">
-                MHz if false)
+                MHz)
                 <br />
             </form>
         </article>
@@ -220,11 +222,12 @@
                 $('#startbutton').click(function () {
 
                     var expParams = getExperimentParameters();
+                    makeUpScanParameterValues(expParams);
                     //Getting plot ready.
                     initialisePlot(document.getElementById("plot"), expParams.ScanParams.ScanParameterName, expParams.DAQmx.AINames);
 
                     // Call the Start method on the hub.
-                    expHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
+                    expHub.server.startExperiment(JSON.stringify(expParams));
 
                 });
 
@@ -250,23 +253,24 @@
                 });
 
                 //A slightly cheezy way of gently moving the DDS frequency to avoid unlocking.
-                //Makes a single mock scan that doesn't acquire any data. 
+                //Makes a single mock scan that doesn't acquire any data.
                 //Make sure the number of points corresponds to a 'safe' frequency interval.
                 //ATM, there is no verification process and the DDS never returns.
                 //Also, the start of the 'move' is unknown (to program), so it needs to be (initially) put in by hand.
                 //To improve on this, make communication to DDS two way so we can to query the 'start' frequency.
                 $('#gobutton').click(function () {
-                    var expParams = getExperimentParameters();
+                    var expParams = getExperimentParameters(document.querySelector('#scanType').value);
                     expParams.ScanParams.AcquireDataDuringScan = false;
                     expParams.ScanParams.StopOnEOS = true;
                     expParams.ScanParams.ScanStart = parseFloat(document.querySelector('#MoveFrom').value);
                     expParams.ScanParams.ScanEnd = parseFloat(document.querySelector('#MoveTo').value);
                     expParams.ScanParams.NumberOfPoints = Math.abs(Math.round(1 / 2 * (expParams.ScanParams.ScanEnd - expParams.ScanParams.ScanStart))); //delta F of 2MHz
+                    makeUpScanParameterValues(expParams);
                     // Call the Start method on the hub.
-                    expHub.server.startExperiment(JSON.stringify(getExperimentParameters()));
+                    expHub.server.startExperiment(JSON.stringify(expParams));
 
                     // So UI remembers end point of previous move.
-                    document.querySelector('#MoveFrom').value = expParams.ScanParams.ScanEnd; 
+                    document.querySelector('#MoveFrom').value = expParams.ScanParams.ScanEnd;
 
 
                 });
@@ -293,7 +297,7 @@
         });
 
         //Gets parameters on UI
-        var getExperimentParameters = function () {
+        var getExperimentParameters = function (scanType) {
             //Stuff that doesn't change very often can be hardcoded here.
             var params = {
                 'DAQmx': {
@@ -327,50 +331,79 @@
                 }
 
             };
-
-
-            //Creates the ramp to send to the experiment.
-
-            var makeScanParameterValues = function () {
-                //Redundant, but makes the code below easier to read.
-                var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
-                var start = parseFloat(params.ScanParams.ScanStart);
-                var end = parseFloat(params.ScanParams.ScanEnd);
-                var hold = parseFloat(params.ScanParams.HoldValue);
-                var points = parseFloat(params.ScanParams.NumberOfPoints);
-
-                //DDS SCAN
-                if (document.querySelector('#ScanBool').value == "true") {
-                    if ((start > 125) && (end < 275)) {
-                        params.ScanParams.ScanParameterValues = function () {
-                            var vals = [], dv = (end - start) / points;
-                            for (var i = 0; i < points / 2; i++) {
-                                vals.push((2 * i * dv + start) * 1000000);
-                            }
-                            for (var i = 0; i < points / 2; i++) {
-                                vals.push((end - 2 * i * dv) * 1000000);
-                            }
-                            return vals;
-                        }();
-                    }
-                }
-
-                    //DDS HOLD
-                else if (document.querySelector('#ScanBool').value == "false") {
-                    if ((hold > 125) && (hold < 275)) {
-                        params.ScanParams.ScanParameterValues = function () {
-                            var vals = [];
-                            for (var i = 0; i < points ; i++) {
-                                vals.push(hold * 1000000);
-                            }
-                            return vals;
-                        }();
-                    }
-                };
-
-            };
-            makeScanParameterValues();
             return params;
+        };
+
+        //Creates the ramp to send to the experiment. 4 types: Up, Down, UpDown and Hold.
+        var makeUpScanParameterValues = function (factor, start, end, points) {
+            var vals = [], dv = (end - start) / points;
+            for (var i = 0; i < points; i++) {
+                vals.push((i * dv + start) * 1000000);
+            }
+            return vals;
+
+
+
+        };
+
+        var makeDownScanParameterValues = function (factor, start, end, points) {
+
+            var vals = [], dv = (end - start) / points;
+            for (var i = 0; i < points; i++) {
+                vals.push((end - i * dv) * 1000000);
+            }
+            return vals;
+
+
+        };
+        var makeUpDownScanParameterValues = function (factor, start, end, points) {
+            var vals = [], dv = (end - start) / points;
+            for (var i = 0; i < points / 2; i++) {
+                vals.push((2 * i * dv + start) * 1000000);
+            }
+            for (var i = 0; i < points / 2; i++) {
+                vals.push((end - 2 * i * dv) * 1000000);
+            }
+            return vals;
+        };
+        var makeHoldScanParameterValues = function (factor, hold, points) {
+            var vals = [];
+            for (var i = 0; i < points ; i++) {
+                vals.push(hold * 1000000);
+            }
+            return vals;
+        };
+
+        //Contains if statements to decide type of scan
+        var makeScanParameterValues = function (params) {
+            //Redundant, but makes the code below easier to read.
+            var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
+            var start = parseFloat(params.ScanParams.ScanStart);
+            var end = parseFloat(params.ScanParams.ScanEnd);
+            var hold = parseFloat(params.ScanParams.HoldValue);
+            var points = parseFloat(params.ScanParams.NumberOfPoints);
+
+            if ((hold > 125) && (hold < 275)) {
+
+                //DDS SCANS
+                if (scanType == "UpDown") {
+                    params.ScanParams.ScanParameterValues = makeUpDownScanParameterValues(factor, start, end, points);
+                }
+                else if (scanType == "Up") {
+                    params.ScanParams.ScanParameterValues = makeUpScanParameterValues(factor, start, end, points);
+                }
+                else if (scanType == "Down") {
+                    params.ScanParams.ScanParameterValues = makeDownScanParameterValues(factor, start, end, points);
+                }
+                    //DDS HOLD
+                else if (scanType == "Hold") {
+                    params.ScanParams.ScanParameterValues = makeHoldScanParameterValues(factor, hold, points);
+                }
+            }
+            else {
+
+            }
+
         };
 
 
