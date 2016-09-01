@@ -147,7 +147,6 @@ namespace EDMPlotter
         {
             ToConsole("Initialising hardware.");
             exp.Initialise(parameters);
-            DataPoint currentPoint;
 
             ToConsole("Acquiring data...");
             int numberOfScans = 0;
@@ -158,8 +157,7 @@ namespace EDMPlotter
                 {
                     if(es.Equals(ExperimentState.IsRunning))
                     {
-                        currentPoint = exp.Acquire(parameters.ScanParams.ScanParameterValues[i]);
-                        currentDataSet.Add(currentPoint);
+                        currentDataSet.Add(exp.Acquire(parameters.ScanParams.ScanParameterValues[i]));
                         //Interval between measurements
                         Thread.Sleep(parameters.ScanParams.Sleep);
                     }
@@ -168,10 +166,13 @@ namespace EDMPlotter
                         break;
                     }               
                 }
-                //Push data down to the client like this.
-                Clients.All.pushLatestData(currentDataSet.ToJson());
-                dataArchive.Add(currentDataSet);
-                numberOfScans++;
+                if (parameters.ScanParams.AcquireDataDuringScan)
+                {
+                    //Push data down to the client like this.
+                    Clients.All.pushLatestData(currentDataSet.ToJson());
+                    dataArchive.Add(currentDataSet);
+                    numberOfScans++;
+                } 
                 if(parameters.ScanParams.StopOnEOS)
                 {
                     es = ExperimentState.IsFinishing;
