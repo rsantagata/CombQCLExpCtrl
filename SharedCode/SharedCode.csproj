@@ -51,7 +51,6 @@
     <Compile Include="CsvExport.cs" />
     <Compile Include="IExperiment.cs" />
     <Compile Include="ExperimentParameters.cs" />
-    <Compile Include="FakeHardware.cs" />
     <Compile Include="ScanParameters.cs" />
     <Compile Include="TsvExport.cs" />
   </ItemGroup>

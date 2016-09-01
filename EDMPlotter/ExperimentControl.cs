@@ -12,7 +12,7 @@ using Wolfram.NETLink;
 
 namespace EDMPlotter
 {
-    public class ExperimentControl //: IDataDroppable
+    public class ExperimentControl
     {
         #region Declarations, constructors, accessors
         private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<ExperimentHub>().Clients));
@@ -20,10 +20,8 @@ namespace EDMPlotter
         List<DataSet> dataArchive;
         DataSet currentDataSet;
         ExperimentParameters parameters;
-        enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
+        public enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
         ExperimentState es;
-
-        object keepRunningCheckLock = new object();
 
         Thread experimentThread;
 
@@ -149,12 +147,25 @@ namespace EDMPlotter
         {
             ToConsole("Initialising hardware.");
             exp.Initialise(parameters);
+            DataPoint currentPoint;
 
             ToConsole("Acquiring data...");
             int numberOfScans = 0;
             while (es.Equals(ExperimentState.IsRunning))
             {
-                currentDataSet = exp.Run();
+                currentDataSet = new DataSet();
+                for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++)
+                {
+
+                    currentPoint = exp.Acquire(parameters.ScanParams.ScanParameterValues[i]);
+                    currentDataSet.Add(currentPoint);
+                    if(es.Equals(ExperimentState.IsFinishing))
+                    {
+                        break;
+                    }
+                    //Interval between measurements
+                    Thread.Sleep(parameters.ScanParams.Sleep);
+                }
                 //Push data down to the client like this.
                 Clients.All.pushLatestData(currentDataSet.ToJson());
                 dataArchive.Add(currentDataSet);
