@@ -30,8 +30,8 @@ namespace EDMPlotter
         public ExperimentControl(IHubConnectionContext<dynamic> clients)
         {
             Clients = clients;
-            exp = new CombQCLScanHardware();
-            //hardware = new FakeHardware();
+            //exp = new CombQCLScanHardware();
+            exp = new FakeHardware();
 
             es = ExperimentState.IsStopped;
             Clients.All.toConsole("Experiment is ready.");

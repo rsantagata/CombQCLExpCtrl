@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombQCLScanHardware.cs" />
+    <Compile Include="FakeHardware.cs" />
     <Compile Include="NumLockIn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DAQmxTriggeredMultiAIHardware.cs" />
