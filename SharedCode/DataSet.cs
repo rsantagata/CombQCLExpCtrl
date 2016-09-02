@@ -18,6 +18,14 @@ namespace SharedCode
         {
             Points = new List<DataPoint>();
         }
+        public DataSet(DataPoint[] points)
+        {
+            Points = new List<DataPoint>();
+            foreach(DataPoint p in points)
+            {
+                Points.Add(p);
+            }
+        }
 
         public int Length
         {
@@ -37,6 +45,15 @@ namespace SharedCode
                 values[i] = Points[i].GetValueOfKey(key);
             }
             return values;
+        }
+        public DataSet GetSubset(int startIndex, int endIndex)
+        {
+            DataSet newSet = new DataSet();
+            for(int i = startIndex; i < endIndex; i++)
+            {
+                newSet.Add(Points[i]);
+            }
+            return newSet;
         }
 
         public string ToJson()

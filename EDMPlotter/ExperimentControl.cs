@@ -171,32 +171,61 @@ namespace EDMPlotter
 
             ToConsole("Acquiring data...");
             int numberOfScans = 0;
-            while (es.Equals(ExperimentState.IsRunning))
+            while (es.Equals(ExperimentState.IsRunning) || es.Equals(ExperimentState.IsPaused))
             {
+                //Tell UI to clear in preparation for new data.
+                Clients.All.clearPlot();
+
                 currentDataSet = new DataSet();
-                int i = 0;
+                int i = 0, iterationsSinceLastDataUpdate = 0;
                 while (i < parameters.ScanParams.NumberOfPoints)
                 {
-                    if(es.Equals(ExperimentState.IsRunning))
+                    //This is to break out mid-scan
+                    if (es.Equals(ExperimentState.IsRunning))
                     {
-                        currentDataSet.Add(exp.Acquire(parameters.ScanParams.ScanParameterValues[i]));
+                        //Need to call this whether acquiring or not... (otherwise DDS command doesn't get sent)
+                        currentDataSet.Add(exp.SetupAndAcquire(parameters.ScanParams.ScanParameterValues[i]));
                         i++;
+                        iterationsSinceLastDataUpdate++;
+
+                        //Only send to plot if acquisition happened.
+                        if (parameters.ScanParams.AcquireDataDuringScan)
+                        {
+                            //Cheezy solution for real time plotting. Update roughly every 0.5 seconds. If I update too often, it crashes on UI side. 
+                            if (iterationsSinceLastDataUpdate * parameters.ScanParams.Sleep > 500)
+                            {
+                                //Push data down to the client like this.
+                                Clients.All.pushLatestData(currentDataSet.GetSubset(i - iterationsSinceLastDataUpdate, i).ToJson());
+                                iterationsSinceLastDataUpdate = 0;
+                            }
+                        }
                     }
                     else if(es.Equals(ExperimentState.IsPaused))
                     {
-
+                        //Only send to plot if acquisition happened.
+                        if (parameters.ScanParams.AcquireDataDuringScan)
+                        {
+                            //Plots any residual data points during pause, if there is anything to plot
+                            if (iterationsSinceLastDataUpdate != 0)
+                            {
+                                Clients.All.pushLatestData(currentDataSet.GetSubset(i - iterationsSinceLastDataUpdate, i).ToJson());
+                                iterationsSinceLastDataUpdate = 0;
+                            }
+                        }
+                        Thread.Sleep(1000);
                     }
                     else
                     {
-                        break;
+                        break; //Somebody pressed the stop button during a scan.
                     }               
                 }
                 if (parameters.ScanParams.AcquireDataDuringScan)
                 {
-                    //Push data down to the client like this.
-                    Clients.All.pushLatestData(currentDataSet.ToJson());
                     dataArchive.Add(currentDataSet);
                     numberOfScans++;
+
+                    //Push data down to the client like this.
+                    Clients.All.pushLatestData(currentDataSet.GetSubset(i - iterationsSinceLastDataUpdate, i).ToJson());
                 } 
                 if(parameters.ScanParams.StopOnEOS)
                 {

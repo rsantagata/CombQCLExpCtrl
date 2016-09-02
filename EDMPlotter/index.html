@@ -193,14 +193,14 @@
 
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
-                //Keep data and experimental parameters on screen:
-
-                clearData();
-                var plot = document.getElementById("plot");
-
-                plotDataWithRightAxes(plot, jData);
+                
+                plotDataWithRightAxes(document.getElementById("plot"), jData);
 
             };
+
+            expHub.client.clearPlot = function () {
+                clearData();
+            }
 
             expHub.client.pushAllDataToTextArea = function (data) {
                 $('#rawData').val(data);

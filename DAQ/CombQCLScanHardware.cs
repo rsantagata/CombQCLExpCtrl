@@ -32,7 +32,7 @@ namespace DAQ
 
         }
 
-        public DataPoint Acquire(double scanParameterValue)
+        public DataPoint SetupAndAcquire(double scanParameterValue)
         {
             DataPoint p = new DataPoint(parameters.ScanParams.ScanParameterName, scanParameterValue);
 

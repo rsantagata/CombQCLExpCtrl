@@ -5,7 +5,7 @@ namespace SharedCode
 	public interface IExperiment
 	{
 		void Initialise(ExperimentParameters p);
-		DataPoint Acquire(double scanParameterValue);
+		DataPoint SetupAndAcquire(double scanParameterValue);
 		void Dispose();
 	}
 }
