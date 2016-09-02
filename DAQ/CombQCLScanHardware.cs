@@ -39,6 +39,10 @@ namespace DAQ
             //This is where the parameter is sent to DDS.
             dds.SetFrequency(scanParameterValue);
 
+            //Interval between measurements. Want the sleep to be between 'frequency change' command and acquisition
+            // (for the laser to settle at new frequency and lock-in to average inputs)
+            Thread.Sleep(parameters.ScanParams.Sleep);
+
             //Reading AIs for this position in scan. 
             //Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
             //Any averaging has to happen before getting added to d.

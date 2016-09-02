@@ -158,8 +158,6 @@ namespace EDMPlotter
                     if(es.Equals(ExperimentState.IsRunning))
                     {
                         currentDataSet.Add(exp.Acquire(parameters.ScanParams.ScanParameterValues[i]));
-                        //Interval between measurements
-                        Thread.Sleep(parameters.ScanParams.Sleep);
                     }
                     else
                     {
