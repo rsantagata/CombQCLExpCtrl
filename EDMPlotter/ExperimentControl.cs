@@ -20,7 +20,7 @@ namespace EDMPlotter
         List<DataSet> dataArchive;
         DataSet currentDataSet;
         ExperimentParameters parameters;
-        public enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing }
+        public enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing, IsPaused }
         ExperimentState es;
 
         Thread experimentThread;
@@ -98,6 +98,27 @@ namespace EDMPlotter
             }
         }
 
+        public void PauseExperiment()
+        {
+            if (experimentThread.IsAlive)
+            {
+                if (es.Equals(ExperimentState.IsRunning))
+                {
+                    ToConsole("Pausing experiment...");
+                    es = ExperimentState.IsPaused;
+                }
+                else if (es.Equals(ExperimentState.IsPaused))
+                {
+                    ToConsole("Restarting experiment...");
+                    es = ExperimentState.IsRunning;
+                }
+            }
+            else
+            {
+                ToConsole("Cannot Pause. Experiment doesn't seem to be running.");
+            }
+        }
+
         public void Save(string format)
         {
             Clients.All.toConsole("Preparing Export.");
@@ -153,11 +174,17 @@ namespace EDMPlotter
             while (es.Equals(ExperimentState.IsRunning))
             {
                 currentDataSet = new DataSet();
-                for (int i = 0; i < parameters.ScanParams.NumberOfPoints; i++)
+                int i = 0;
+                while (i < parameters.ScanParams.NumberOfPoints)
                 {
                     if(es.Equals(ExperimentState.IsRunning))
                     {
                         currentDataSet.Add(exp.Acquire(parameters.ScanParams.ScanParameterValues[i]));
+                        i++;
+                    }
+                    else if(es.Equals(ExperimentState.IsPaused))
+                    {
+
                     }
                     else
                     {

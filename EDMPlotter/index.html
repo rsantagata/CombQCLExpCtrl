@@ -76,6 +76,7 @@
         <article id="startstopcontainer">
             <input type="button" id="startbutton" value="Start" />
             <input type="button" id="stopbutton" value="Stop" />
+            <input type="button" id="pausebutton" value="Pause" />
         </article>
         <article id="frequencystepcontainer">
             Frequency Step Configuration
@@ -235,6 +236,11 @@
                 $('#stopbutton').click(function () {
                     // Call the Stop method on the hub.
                     expHub.server.stopExperiment();
+                });
+
+                $('#pausebutton').click(function () {
+                    // Call the Stop method on the hub.
+                    expHub.server.pauseExperiment();
                 });
 
                 $('#converttoddsunitsbutton').click(function () {

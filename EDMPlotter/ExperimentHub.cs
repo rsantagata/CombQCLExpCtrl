@@ -28,6 +28,11 @@ namespace EDMPlotter
             ExperimentControl.Instance.StopExperiment();
         }
 
+        public void PauseExperiment()
+        {
+            ExperimentControl.Instance.PauseExperiment();
+        }
+
         public void SaveExperiment(string format)
         {
             ExperimentControl.Instance.Save(format);

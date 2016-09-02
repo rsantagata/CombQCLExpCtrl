@@ -20,10 +20,11 @@ namespace DAQ
             Thread.Sleep(parameters.ScanParams.Sleep);
 
             //Generates an array of 0 as data.
+            Random r = new Random();
             double[] emptyData = new double[parameters.DAQmx.AINames.Length];
             for(int i = 0; i < emptyData.Length; i++)
             {
-                emptyData[i] = 0.0;
+                emptyData[i] = r.Next();
             }
             p.Add(parameters.DAQmx.AINames, emptyData);
 
