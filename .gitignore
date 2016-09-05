@@ -19,7 +19,12 @@
 *.vs
 ###Mac weirdness
 *.DS_Store
-
+####################
+#tmp folder for saving temp data
+tempcsv.csv
+tempjson.json
+tempmma.nb
+temptsv.tsv
 ####################
 UpgradeLog.XML
 _UpgradeReport_Files/
@@ -29,7 +34,6 @@ _UpgradeReport_Files/
 bin/
 obj/
 TestResults/
-tmp/
 ###################
 # Web publish log #
 ###################

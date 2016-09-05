@@ -23,7 +23,7 @@ namespace DAQ
         public void Connect()
         {
             serial = new SerialSession(physicalAddress);
-            serial.BaudRate = 19200;
+            serial.BaudRate = 115200;
             serial.DataBits = 8;
             serial.StopBits = SerialStopBitsMode.One;
             serial.ReadTermination = SerialTerminationMethod.HighestBit;
