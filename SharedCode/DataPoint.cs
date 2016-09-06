@@ -104,6 +104,7 @@ namespace SharedCode
             double[] newValues = new double[values.Length];
             for (int i = 0; i < newValues.Length; i++)
             {
+                newValues[i] = val * values[i];
             }
             DataPoint newPoint = new DataPoint(keys, newValues);
             return newPoint;
