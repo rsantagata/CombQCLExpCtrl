@@ -19,12 +19,12 @@ namespace DAQ
             // (for the laser to settle at new frequency and lock-in to average inputs)
             Thread.Sleep(parameters.ScanParams.Sleep);
 
-            //Generates an array of 0 as data.
+            //Generates an array of data.
             Random r = new Random();
             double[] emptyData = new double[parameters.DAQmx.AINames.Length];
             for(int i = 0; i < emptyData.Length; i++)
             {
-                emptyData[i] = r.Next();
+                emptyData[i] = r.NextDouble();
             }
             p.Add(parameters.DAQmx.AINames, emptyData);
 

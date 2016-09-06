@@ -17,8 +17,11 @@ namespace EDMPlotter
         #region Declarations, constructors, accessors
         private readonly static Lazy<ExperimentControl> _instance = new Lazy<ExperimentControl>(() => new ExperimentControl(GlobalHost.ConnectionManager.GetHubContext<ExperimentHub>().Clients));
 
+        //I deliberately keep current and averaged data separate from the archive. 
+        //In time, I want to take the archive and saving functions away from this program, and over to a database.
         List<DataSet> dataArchive;
         DataSet currentDataSet;
+        DataSet averagedDataSet;
         ExperimentParameters parameters;
         public enum ExperimentState { IsStopped, IsStarting, IsRunning, IsFinishing, IsPaused }
         ExperimentState es;
@@ -170,7 +173,10 @@ namespace EDMPlotter
             exp.Initialise(parameters);
 
             ToConsole("Acquiring data...");
+
+            //Prepare for keeping track of average
             int numberOfScans = 0;
+
             while (es.Equals(ExperimentState.IsRunning) || es.Equals(ExperimentState.IsPaused))
             {
                 //Tell UI to clear in preparation for new data.
@@ -221,11 +227,30 @@ namespace EDMPlotter
                 }
                 if (parameters.ScanParams.AcquireDataDuringScan)
                 {
-                    dataArchive.Add(currentDataSet);
+                    //Finished acquiring a scan
                     numberOfScans++;
 
-                    //Push data down to the client like this.
+                    //One day, this part will be more like: "Send to server"
+                    dataArchive.Add(currentDataSet);                   
+
+                    //Push any remaining data down to the current plot.
                     Clients.All.pushLatestData(currentDataSet.GetSubset(i - iterationsSinceLastDataUpdate, i).ToJson());
+
+                    //Deal with averaging
+                    if(numberOfScans > 1)
+                    {
+                        updateAveragedDataSet(currentDataSet, numberOfScans);
+                        Clients.All.clearAveragePlot();
+                    }
+                    else
+                    {
+                        averagedDataSet = currentDataSet;
+                        Clients.All.clearAveragePlot();
+                    }
+                    
+
+                    //Push averaged data to the aveplot.
+                    Clients.All.pushAverageData(averagedDataSet.ToJson());
                 } 
                 if(parameters.ScanParams.StopOnEOS)
                 {
@@ -325,6 +350,15 @@ namespace EDMPlotter
                 throw new ExperimentalParametersException();
             }
 
+        }
+
+        //
+        void updateAveragedDataSet(DataSet newData, int numberOfScans)
+        {
+            for(int i = 0; i < newData.Points.Count; i++)
+            {
+                averagedDataSet.Points[i] = (1 / (double)numberOfScans) * ((((double)numberOfScans - 1) * averagedDataSet.Points[i]) + newData.Points[i]);
+            }
         }
 
     }
