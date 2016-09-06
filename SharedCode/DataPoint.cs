@@ -9,6 +9,7 @@ namespace SharedCode
     {
         public List<KeyValuePair<string, double>> kvPairs;
 
+        //Hardcoding acquisition time into a datapoint. Use as comment box is there's not data (average, unacquired etc.)
         string dateTime;
 
         public DataPoint(string name, double val, string dateTime)
