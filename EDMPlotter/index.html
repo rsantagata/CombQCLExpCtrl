@@ -15,28 +15,60 @@
     <script src="https://cdn.plot.ly/plotly-latest.js"></script>
     <script src="js/plotlyplot.js" type="text/javascript"></script>
     <style type="text/css">
-        .auto-style1 {
-            font-size: small;
+        #ScanStart {
+            width: 70px;
         }
 
-        #ScanStart {
-            width: 80px;
+        #ScanStart2 {
+            width: 70px;
         }
 
         #ScanEnd {
-            width: 80px;
+            width: 70px;
+        }
+
+        #ScanEnd2 {
+            width: 70px;
         }
 
         #ScanHoldValue {
-            width: 80px;
+            width: 70px;
+        }
+
+        #ScanHoldValue2 {
+            width: 70px;
         }
 
         #NumberOfPoints {
-            width: 80px;
+            width: 70px;
         }
 
         #Sleep {
-            width: 80px;
+            width: 70px;
+        }
+
+        #MoveTo {
+            width: 70px;
+        }
+
+        #MoveTo2 {
+            width: 70px;
+        }
+
+        #MoveFrom {
+            width: 70px;
+        }
+
+        #MoveFrom2 {
+            width: 70px;
+        }
+
+        #converttoddsunitsbuttonhold {
+            width: 180px;
+        }
+
+        #converttoddsunitsbutton {
+            width: 180px;
         }
     </style>
 </head>
@@ -53,83 +85,102 @@
 
     <section class="controlpanel">
 
-        <article id="numberofpointscontainer">
-            Number of data points:
-            <form name="numberofpointsform" id="numberofpointsform">   
-                <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
-            </form>        
-        </article>
 
-        <br />
-        <label>Single Output Control</label><br />
+        <label>Parameters</label><br />
 
-        <article id="movecontainer">
-            current DDS Frequency:
-            <input type="text" name="MoveFrom" id="MoveFrom" value="150"> MHz <br />
-            target DDS Frequency:
-            <input type="text" name="MoveTo" id="MoveTo" value="250"> MHz <br />
-            <input type="button" id="gobutton" value="Go" />
-        </article><br />
-
-        <label>Scan Control</label><br />
-
-        <article id="startstopcontainer">
-            <input type="button" id="startbutton" value="Start" />
-            <input type="button" id="stopbutton" value="Stop" />
-            <input type="button" id="pausebutton" value="Pause" />
-        </article>
-        <article id="frequencystepcontainer">
-            Frequency Step Configuration
-            <form name="frequencystepform" id="frequencystepform">
-                Sample loop rest interval [ms]:
-                <input type="text" name="Sleep" id="Sleep" value="10">
-                <br />
-                <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
-            </form>
-        </article>
         <article id="scanboolcontainer">
+            Number of data points:
+            <input type="text" name="NumberOfPoints" id="NumberOfPoints" value="100">
+            <br />
+            Sample loop rest interval [ms]:
+            <input type="text" name="Sleep" id="Sleep" value="10">
+            <br />
+        </article>
 
-            <label>Scan Type</label><br />
-            <form name="scantypeform" id="scantypeform">
-                Scan:
-                <select name="ScanType" id="ScanType">
-                    <option selected>UpDown</option>
-                    <option>Up</option>
-                    <option>Down</option>
-                    <option>Hold</option>
-                </select>
-                (If hold, hold at:
-                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="200">
-                MHz)
+        <article id="warningcontainer">
+            <label> Warning: allowed values are  </label><br />
+            <label> m x f<sub>min</sub> = 8 GHz <space> < <space> f=m x f<sub>DDS</sub> </space> < <space>m x f<sub>max</sub> = 17.6 GHz</label><br />
+            <label> f<sub>min</sub> = 125 MHz <space> < <space> f<sub>DDS</sub></space> < <space>f<sub>max</sub> = 275 MHz </label><br />
+            <br />
+            External factor 'm':
+            <input type="text" name="ExternalFactor" id="ExternalFactor" value="64">
+            <br />
+            <br />
+        </article>
+        <br />
+
+        <label>Scan Settings</label><br />
+        <article id="settings">
+            Scan Type:
+            <select name="ScanType" id="ScanType">
+                <option selected>UpDown</option>
+                <option>Up</option>
+                <option>Hold</option>
+            </select>
+            <br />
+            <input type="checkbox" name="eosstopcheckbox" id="eosstopcheckbox" value="eosStop" />Stop on end-of-Scan
+        </article>
+
+        <article id="holdcontainer">
+            <form name="holdform" id="holdform">
+                <label>- Hold -</label><br />
+
+                Hold frequency:
+                <input type="text" name="ScanHoldValue2" id="ScanHoldValue2" value="8">
+                <label id="frequnitslabel32">GHz</label>&nbsp;&nbsp;
+                <input type="text" name="ScanHoldValue" id="ScanHoldValue" value="125">
+                <label id="frequnitslabel3">MHz</label>
+                <input type="button" id="converttoddsunitsbuttonhold" value="Convert to DDS units" />
                 <br />
             </form>
         </article>
 
         <article id="scanrangecontainer">
             <form name="scanrangeform" id="scanrangeform">
-                <label>Scan Parameters (ignore if Scan Bool = false)</label><br />
+                <label>- UpDown, Up -</label><br />
+
+                <label>Start frequency:</label>
+                <input type="text" name="ScanStart2" id="ScanStart2" value="8">
+                <label id="frequnitslabel12">GHz</label>&nbsp;&nbsp;
+                <input type="text" name="ScanStart" id="ScanStart" value="125">
+                <label id="frequnitslabel1">MHz</label>
                 <br />
-                <label>Start frequency</label>
-                <input type="text" name="ScanStart" id="ScanStart" value="150">
-                <label id="frequnitslabel1">MHz to DDS</label>
-                <br />
-                <label>Stop frequency</label>
+                <label>Stop frequency:</label>
+                <input type="text" name="ScanEnd2" id="ScanEnd2" value="16">
+                <label id="frequnitslabel22">GHz</label>&nbsp;&nbsp;
                 <input type="text" name="ScanEnd" id="ScanEnd" value="250">
-                <label id="frequnitslabel2">MHz to DDS</label>
+                <label id="frequnitslabel2">MHz</label>
                 <br />
 
-                External factor 'm':
-                <input type="text" name="ExternalFactor" id="ExternalFactor" value="64">
                 <input type="button" id="converttoddsunitsbutton" value="Convert to DDS units" />
-                <br />
-
-                <br />
-                <label> Warning: allowed values are  </label><br />
-                <label> f<sub>min</sub> = 125 MHz <space> < <space> f<sub>DDS</sub></space> < <space>f<sub>max</sub> = 275 MHz </label><br />
-                <label> 64 x f<sub>min</sub> = 8 GHz <space> < <space> 64 x f<sub>DDS</sub> </space> < <space>64 x f<sub>max</sub> = 17.6 GHz</label><br />
-                <br />
             </form>
+        </article><br />
+
+        <label>Scan Control</label><br />
+        <article id="startstopcontainer">
+            <input type="button" id="startbutton" value="Start" />
+            <input type="button" id="stopbutton" value="Stop" />
+            <input type="button" id="pausebutton" value="Pause" />
         </article>
+        <br />
+
+        <label>Single Output Control</label><br />
+        <article id="movecontainer">
+            current frequency:
+            <input type="text" name="MoveFrom2" id="MoveFrom2" value="10">
+            <label id="frequnitslabel42">GHz</label>&nbsp;&nbsp;
+            <input type="text" name="MoveFrom" id="MoveFrom" value="">
+            <label id="frequnitslabel4">MHz</label> <br />
+            target frequency:&nbsp;&nbsp;
+            <input type="text" name="MoveTo2" id="MoveTo2" value="11">
+            <label id="frequnitslabel52">GHz</label>&nbsp;&nbsp;
+            <input type="text" name="MoveTo" id="MoveTo" value="">
+            <label id="frequnitslabel5">MHz</label>
+            <br />
+            <input type="button" id="converttoddsunitsbuttongo" value="Convert to DDS units" />
+            <input type="button" id="gobutton" value="Go" />
+        </article><br />
+
 
 
         <article id="daqmxparamscontainer">
@@ -142,7 +193,6 @@
                 </select>
             </form>
         </article>
-
     </section>
 
     <section class="datadisplay">
@@ -152,9 +202,9 @@
             <input type="button" id="clearplotbutton" value="Clear" />
             <label>
                 Plot with x-axis as:<select name="xaxisselect" id="xaxisselect">
-                    <option selected>DDS Frequency</option>
+                    <option selected>Frequency</option>
+                    <option>DDS Frequency</option>
                     <option>Acquisition Order</option>
-                    <option>Frequency * External Factor</option>
                 </select>
             </label>
 
@@ -193,7 +243,7 @@
 
                 //parse to send to plotting functions.
                 var jData = JSON.parse(data);
-                
+
                 plotDataWithRightAxes(document.getElementById("plot"), jData);
 
             };
@@ -244,10 +294,23 @@
                 });
 
                 $('#converttoddsunitsbutton').click(function () {
-                    document.querySelector('#ScanStart').value = document.querySelector('#ScanStart').value / document.querySelector('#ExternalFactor').value;
-                    document.querySelector('#ScanEnd').value = document.querySelector('#ScanEnd').value / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#ScanStart').value = (document.querySelector('#ScanStart2').value * 1000) / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#ScanEnd').value = (document.querySelector('#ScanEnd2').value * 1000) / document.querySelector('#ExternalFactor').value;
                     document.querySelector('#frequnitslabel1').textContent = "MHz (converted)";
                     document.querySelector('#frequnitslabel2').textContent = "MHz (converted)";
+                });
+
+                $('#converttoddsunitsbuttonhold').click(function () {
+                    document.querySelector('#ScanHoldValue').value = (document.querySelector('#ScanHoldValue2').value * 1000) / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#frequnitslabel3').textContent = "MHz (converted)";
+                });
+
+
+                $('#converttoddsunitsbuttongo').click(function () {
+                    document.querySelector('#MoveFrom').value = (document.querySelector('#MoveFrom2').value * 1000) / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#MoveTo').value = (document.querySelector('#MoveTo2').value * 1000) / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#frequnitslabel4').textContent = "MHz (converted)";
+                    document.querySelector('#frequnitslabel5').textContent = "MHz (converted)";
                 });
 
                 $('#clearplotbutton').click(function () {
@@ -325,7 +388,7 @@
                     'ScanStart': document.querySelector('#ScanStart').value,
                     'ScanEnd': document.querySelector('#ScanEnd').value,
                     'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
-                    'HoldValue': document.querySelector('#ScanHoldValue').value,
+                    'ScanHoldValue': document.querySelector('#ScanHoldValue').value,
                     'Sleep': document.querySelector('#Sleep').value,
                     'ScanParameterName': 'Frequency [Hz]',
                     'AcquireDataDuringScan': true,
@@ -343,7 +406,7 @@
 
         //Creates the ramp to send to the experiment. 4 types: Up, Down, UpDown and Hold.
         var makeUpScanParameterValues = function (factor, start, end, points) {
-            var vals = [], dv = (end - start) / points;
+            var vals = [], dv = (end - start) / (points - 1);
             for (var i = 0; i < points; i++) {
                 vals.push((i * dv + start) * 1000000);
             }
@@ -351,7 +414,7 @@
         };
 
         var makeDownScanParameterValues = function (factor, start, end, points) {
-            var vals = [], dv = (end - start) / points;
+            var vals = [], dv = (end - start) / (points - 1);
             for (var i = 0; i < points; i++) {
                 vals.push((end - i * dv) * 1000000);
             }
@@ -359,7 +422,7 @@
         };
 
         var makeUpDownScanParameterValues = function (factor, start, end, points) {
-            var vals = [], dv = (end - start) / points;
+            var vals = [], dv = (end - start) / (points - 2);
             for (var i = 0; i < points / 2; i++) {
                 vals.push((2 * i * dv + start) * 1000000);
             }
@@ -383,10 +446,10 @@
             var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
             var start = parseFloat(params.ScanParams.ScanStart);
             var end = parseFloat(params.ScanParams.ScanEnd);
-            var hold = parseFloat(params.ScanParams.HoldValue);
+            var hold = parseFloat(params.ScanParams.ScanHoldValue);
             var points = parseFloat(params.ScanParams.NumberOfPoints);
             var scanParameterValues;
-            if ((hold > 125) && (hold < 275)) {
+            if ((start >= 125) && (end <= 275) && (hold >= 125) && (hold <= 275)) {
 
                 //DDS SCANS
                 if (scanType == "UpDown") {
@@ -394,6 +457,7 @@
                 }
                 else if (scanType == "Up") {
                     scanParameterValues = makeUpScanParameterValues(factor, start, end, points);
+
                 }
                 else if (scanType == "Down") {
                     scanParameterValues = makeDownScanParameterValues(factor, start, end, points);
@@ -404,7 +468,7 @@
                 }
             }
             else {
-
+                alert("Error: values not allowed!");
             }
             return scanParameterValues;
         };

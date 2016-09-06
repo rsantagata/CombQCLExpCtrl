@@ -11,7 +11,7 @@ namespace SharedCode
         public double ScanStart { get; set; }
         public double ScanStop { get; set; }
         public int NumberOfPoints { get; set; }
-        public int HoldValue { get; set; }
+        public double ScanHoldValue { get; set; }
         public int Sleep { get; set; }
         public string ScanParameterName { get; set; }
         public double[] ScanParameterValues { get; set; }
