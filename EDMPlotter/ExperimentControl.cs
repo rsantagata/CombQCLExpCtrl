@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using DAQ;
 using SharedCode;
 using Wolfram.NETLink;
+using System.Diagnostics;
 
 
 namespace EDMPlotter
@@ -193,6 +194,7 @@ namespace EDMPlotter
                         currentDataSet.Add(exp.SetupAndAcquire(parameters.ScanParams.ScanParameterValues[i]));
                         i++;
                         iterationsSinceLastDataUpdate++;
+                        //ToConsole("Acquisition time is: " + (dateTime + watch.Elapsed).ToString("{ dd / MM / yyy HH: mm: ss.fff}"));
 
                         //Only send to plot if acquisition happened.
                         if (parameters.ScanParams.AcquireDataDuringScan)
@@ -227,32 +229,23 @@ namespace EDMPlotter
                 }
                 if (parameters.ScanParams.AcquireDataDuringScan)
                 {
-                    //Finished acquiring a scan
-                    numberOfScans++;
-
-                    //One day, this part will be more like: "Send to server"
-                    dataArchive.Add(currentDataSet);                   
-
                     //Push any remaining data down to the current plot.
                     Clients.All.pushLatestData(currentDataSet.GetSubset(i - iterationsSinceLastDataUpdate, i).ToJson());
 
-                    //Deal with averaging
-                    if(numberOfScans > 1)
-                    {
-                        updateAveragedDataSet(currentDataSet, numberOfScans);
-                        Clients.All.clearAveragePlot();
-                    }
-                    else
-                    {
-                        averagedDataSet = currentDataSet;
-                        Clients.All.clearAveragePlot();
-                    }
-                    
+                    //Finished acquiring a scan
+                    numberOfScans++;
 
+                    updateAveragedDataSet(currentDataSet, numberOfScans);
+                    Clients.All.clearAveragePlot();                   
+                    
                     //Push averaged data to the aveplot.
                     Clients.All.pushAverageData(averagedDataSet.ToJson());
-                } 
-                if(parameters.ScanParams.StopOnEOS)
+
+                    //One day, this part will be more like: "Send to server"
+                    dataArchive.Add(currentDataSet);
+
+                }
+                if (parameters.ScanParams.StopOnEOS)
                 {
                     es = ExperimentState.IsFinishing;
                 }
@@ -355,9 +348,16 @@ namespace EDMPlotter
         //
         void updateAveragedDataSet(DataSet newData, int numberOfScans)
         {
-            for(int i = 0; i < newData.Points.Count; i++)
+            if (numberOfScans > 1)
             {
-                averagedDataSet.Points[i] = (1 / (double)numberOfScans) * ((((double)numberOfScans - 1) * averagedDataSet.Points[i]) + newData.Points[i]);
+                for (int i = 0; i < newData.Points.Count; i++)
+                {
+                    averagedDataSet.Points[i] = (1 / (double)numberOfScans) * ((((double)numberOfScans - 1) * averagedDataSet.Points[i]) + newData.Points[i]);
+                }
+            }
+            else
+            {
+                averagedDataSet = new DataSet(newData.Points.ToArray());
             }
         }
 

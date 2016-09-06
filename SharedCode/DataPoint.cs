@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace SharedCode
 {
@@ -11,19 +9,23 @@ namespace SharedCode
     {
         public List<KeyValuePair<string, double>> kvPairs;
 
-        public DataPoint(string name, double val)
+        string dateTime;
+
+        public DataPoint(string name, double val, string dateTime)
         {
             kvPairs = new List<KeyValuePair<string, double>>();
             kvPairs.Add(new KeyValuePair<string, double>(name, val));
+            this.dateTime = dateTime;
         }
 
-        public DataPoint(string[] names, double[] vals)
+        public DataPoint(string[] names, double[] vals, string dateTime)
         {
             kvPairs = new List<KeyValuePair<string, double>>();
             for (int i = 0; i < names.Length; i++)
             {
                 kvPairs.Add(new KeyValuePair<string, double>(names[i], vals[i]));
             }
+            this.dateTime = dateTime;
         }
 
         public int Dimensions()
@@ -37,15 +39,26 @@ namespace SharedCode
             {
                 o[kvPairs[i].Key] = kvPairs[i].Value;
             }
+            o["DateTime"] = dateTime;
             return o;
         }
 
-        public void Add(string[] names, double[] vals)
+        /*public void Add(string[] names, double[] vals)
         {
             for (int i = 0; i < names.Length; i++)
             {
                 kvPairs.Add(new KeyValuePair<string, double>(names[i], vals[i]));
             }
+            dateTime = DateTime.Now;
+        }*/
+
+        public void Add(string[] names, double[] vals, string dateTime)
+        {
+            for (int i = 0; i < names.Length; i++)
+            {
+                kvPairs.Add(new KeyValuePair<string, double>(names[i], vals[i]));
+            }
+            this.dateTime = dateTime;
         }
 
         public double GetValueOfKey(string key)
@@ -93,7 +106,7 @@ namespace SharedCode
             {
                 sumValues[i] = aValues[i] + bValues[i];
             }
-            DataPoint newPoint = new DataPoint(keys, sumValues);
+            DataPoint newPoint = new DataPoint(keys, sumValues, "Sum of points (timestamp meaningless)");
             return newPoint;
         }
 
@@ -106,7 +119,7 @@ namespace SharedCode
             {
                 newValues[i] = val * values[i];
             }
-            DataPoint newPoint = new DataPoint(keys, newValues);
+            DataPoint newPoint = new DataPoint(keys, newValues, "Product of points (timestamp meaningless)");
             return newPoint;
         }
         public static DataPoint operator*(DataPoint p, double val)

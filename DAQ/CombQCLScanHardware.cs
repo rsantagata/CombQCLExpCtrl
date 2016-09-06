@@ -34,7 +34,7 @@ namespace DAQ
 
         public DataPoint SetupAndAcquire(double scanParameterValue)
         {
-            DataPoint p = new DataPoint(parameters.ScanParams.ScanParameterName, scanParameterValue);
+            DataPoint p = new DataPoint(parameters.ScanParams.ScanParameterName, scanParameterValue, "Unacquired");
 
             //This is where the parameter is sent to DDS.
             dds.SetFrequency(scanParameterValue);
@@ -46,8 +46,7 @@ namespace DAQ
             //Reading AIs for this position in scan. 
             //Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
             //Any averaging has to happen before getting added to d.
-            p.Add(parameters.DAQmx.AINames, daq.ReadAI());
-
+            p.Add(parameters.DAQmx.AINames, daq.ReadAI(), DateTime.UtcNow.ToString("{dd/MM/yyy HH:mm:ss.fff}"));
             return p;
         }
 
