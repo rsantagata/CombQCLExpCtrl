@@ -23,7 +23,7 @@
             width: 80px;
         }
 
-        #ScanEnd {
+        #ScanStop {
             width: 80px;
         }
 
@@ -114,7 +114,7 @@
                 <label id="frequnitslabel1">MHz to DDS</label>
                 <br />
                 <label>Stop frequency</label>
-                <input type="text" name="ScanEnd" id="ScanEnd" value="250">
+                <input type="text" name="ScanStop" id="ScanStop" value="250">
                 <label id="frequnitslabel2">MHz to DDS</label>
                 <br />
 
@@ -247,7 +247,7 @@
                 });
                 $('#converttoddsunitsbutton').click(function () {
                     document.querySelector('#ScanStart').value = document.querySelector('#ScanStart').value / document.querySelector('#ExternalFactor').value;
-                    document.querySelector('#ScanEnd').value = document.querySelector('#ScanEnd').value / document.querySelector('#ExternalFactor').value;
+                    document.querySelector('#ScanStop').value = document.querySelector('#ScanStop').value / document.querySelector('#ExternalFactor').value;
                     document.querySelector('#frequnitslabel1').textContent = "MHz (converted)";
                     document.querySelector('#frequnitslabel2').textContent = "MHz (converted)";
                 });
@@ -273,13 +273,13 @@
                     expParams.ScanParams.AcquireDataDuringScan = false;
                     expParams.ScanParams.StopOnEOS = true;
                     expParams.ScanParams.ScanStart = parseFloat(document.querySelector('#MoveFrom').value);
-                    expParams.ScanParams.ScanEnd = parseFloat(document.querySelector('#MoveTo').value);
-                    expParams.ScanParams.NumberOfPoints = Math.abs(Math.round(1 / 2 * (expParams.ScanParams.ScanEnd - expParams.ScanParams.ScanStart))); //delta F of 2MHz
+                    expParams.ScanParams.ScanStop = parseFloat(document.querySelector('#MoveTo').value);
+                    expParams.ScanParams.NumberOfPoints = Math.abs(Math.round(1 / 2 * (expParams.ScanParams.ScanStop - expParams.ScanParams.ScanStart))); //delta F of 2MHz
                     expParams.ScanParams.ScanParameterValues = makeScanParameterValues(expParams, "Up");
                     // Call the Start method on the hub.
                     expHub.server.startExperiment(JSON.stringify(expParams));
                     // So UI remembers end point of previous move.
-                    document.querySelector('#MoveFrom').value = expParams.ScanParams.ScanEnd;
+                    document.querySelector('#MoveFrom').value = expParams.ScanParams.ScanStop;
                 });
             });
         });
@@ -319,7 +319,7 @@
                 },
                 'ScanParams': {
                     'ScanStart': document.querySelector('#ScanStart').value,
-                    'ScanEnd': document.querySelector('#ScanEnd').value,
+                    'ScanStop': document.querySelector('#ScanStop').value,
                     'NumberOfPoints': document.querySelector('#NumberOfPoints').value,
                     'HoldValue': document.querySelector('#ScanHoldValue').value,
                     'Sleep': document.querySelector('#Sleep').value,
@@ -372,7 +372,7 @@
             //Redundant, but makes the code below easier to read.
             var factor = parseFloat(params.ExternalParams.MultiplicationFactor);
             var start = parseFloat(params.ScanParams.ScanStart);
-            var end = parseFloat(params.ScanParams.ScanEnd);
+            var end = parseFloat(params.ScanParams.ScanStop);
             var hold = parseFloat(params.ScanParams.HoldValue);
             var points = parseFloat(params.ScanParams.NumberOfPoints);
             var scanParameterValues;
