@@ -187,6 +187,7 @@ namespace EDMPlotter
                 Clients.All.clearPlot();
 
                 currentDataSet = new DataSet();
+                currentDataSet.datetime = DateTime.Now;
                 int i = 0, iterationsSinceLastDataUpdate = 0;
                 while (i < parameters.ScanParams.NumberOfPoints)
                 {

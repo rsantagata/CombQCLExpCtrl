@@ -11,7 +11,7 @@ namespace SharedCode
 {
     public class DataSet
     {
-
+        public DateTime datetime;
         public List<DataPoint> Points;
 
         public DataSet()

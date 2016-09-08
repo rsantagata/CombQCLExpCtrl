@@ -35,6 +35,8 @@ namespace SharedCode
             commandString += getAddExternalParametersString(parameters.ExternalParams, nextScanID);
             commandString += getAddDAQmxParametersString(parameters.DAQmx, nextScanID);
 
+            commandString += "INSERT INTO scan_start_times (scanid, scan_start_time) VALUES (" + nextScanID + ",\""
+                + data.datetime.ToString("yyy-MM-dd HH:mm:ss") + "\");";
 
             commandString += "INSERT INTO input_config (scanid, input_name, input_address) VALUES";
             for (int i = 0; i < parameters.DAQmx.AINames.Length; i++)
