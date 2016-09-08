@@ -28,7 +28,7 @@ namespace EDMPlotter
         ExperimentState es;
 
         Thread experimentThread;
-
+        MySQLHelper sql;
         IExperiment exp;
 
         public ExperimentControl(IHubConnectionContext<dynamic> clients)
@@ -36,6 +36,8 @@ namespace EDMPlotter
             Clients = clients;
             //exp = new CombQCLScanHardware();
             exp = new FakeHardware();
+
+            sql = new MySQLHelper();
 
             es = ExperimentState.IsStopped;
             Clients.All.toConsole("Experiment is ready.");
@@ -76,6 +78,7 @@ namespace EDMPlotter
                 }
                 if (IsParamsReadable)
                 {
+                    
                     dataArchive = new List<DataSet>();
 
                     experimentThread = new Thread(new ThreadStart(run));
@@ -243,6 +246,7 @@ namespace EDMPlotter
 
                     //One day, this part will be more like: "Send to server"
                     dataArchive.Add(currentDataSet);
+                    sql.SendData(currentDataSet, parameters);
 
                 }
                 if (parameters.ScanParams.StopOnEOS)
