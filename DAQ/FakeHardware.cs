@@ -25,7 +25,7 @@ namespace DAQ
             {
                 emptyData[i] = r.NextDouble();
             }
-            p.Add(parameters.DAQmx.AINames, emptyData, DateTime.UtcNow.ToString("{dd/MM/yyy HH:mm:ss.fff}"));
+            p.Add(parameters.DAQmx.AINames, emptyData, DateTime.UtcNow.ToString("yyy-MM-dd HH:mm:ss.fff"));
             return p;
         }
 

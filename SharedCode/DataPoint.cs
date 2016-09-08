@@ -96,6 +96,11 @@ namespace SharedCode
             return values;
         }
 
+        public string GetDateTime()
+        {
+            return dateTime;
+        }
+
         //Don't use this unless you're sure that the two points have the same number of kv pairs.
         public static DataPoint operator+ (DataPoint a, DataPoint b)
         {

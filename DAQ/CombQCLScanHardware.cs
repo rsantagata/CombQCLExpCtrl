@@ -46,7 +46,7 @@ namespace DAQ
             //Reading AIs for this position in scan. 
             //Note! No matter how many measurements are performed in daq.ReadAI, this only takes one number per channel.
             //Any averaging has to happen before getting added to d.
-            p.Add(parameters.DAQmx.AINames, daq.ReadAI(), DateTime.UtcNow.ToString("{dd/MM/yyy HH:mm:ss.fff}"));
+            p.Add(parameters.DAQmx.AINames, daq.ReadAI(), DateTime.UtcNow.ToString("yyy-MM-dd HH:mm:ss.fff"));
             return p;
         }
 
